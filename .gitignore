@@ -1,6 +1,7 @@
-
 *.gz
 *.DUMP
 *.LIST
 *.README
 .DS_Store
+/data/*
+
