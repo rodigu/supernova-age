@@ -50,7 +50,6 @@ def get_data():
             lc_df['SNR'] = lc_df['FLUXCAL']/lc_df['FLUXCALERR'] # signal to noise ratio
             lc_df['MAG'] = np.array(-2.5*np.log10(np.abs(lc_df['FLUXCAL'])))+27.5 # magnitudes
             lc_df['MAGERR'] = 1.086/lc_df['SNR'] # magnitude error
-            lc_df['int_MJD'] = [int(i) for i in lc_df['MJD']]
             
                     # observations              # nondetections           # Signal to noise cut       
             mask = (lc_df['PHOTFLAG'] != 0)  #| (lc_df['PHOTFLAG'] == 0)  | (lc_df['SNR'] >= 4) 
@@ -64,48 +63,22 @@ def get_data():
                     "i ": u"#832db6", # YSE-i
                     "z ": u"#656364"} # YSE-z
             lc_df['PLOTCOLOR'] = lc_df.BAND.map(D_id_color)
-            # appended_meta_data.append(lc_df_meta)
-            for pb, c in D_id_color.items():
-                #print(pb, c)
-                lc_df_pb = lc_df[lc_df.BAND == pb]
-                appended_data.append(lc_df_pb)
-            # print(type(appended_data),filename)
             
-            lc_df_band = lc_df.groupby('BAND')
-            # print(lc_df_band['BAND' = 'r'])
-            # lc_df_band_r = lc_df_band.get_group('r')
-            # lc_df_band_g = lc_df_band.get_group('g')
-            # lc_df_band_i = lc_df_band.get_group('i')
-            lc_df['BAND_r'] = lc_df.apply(lambda row: 0 if row['BAND'] != 'r ' else row['MAG'],axis=1)
-            lc_df['BAND_g'] = lc_df.apply(lambda row: 0 if row['BAND'] != 'g ' else row['MAG'],axis=1)
-            lc_df['BAND_i'] = lc_df.apply(lambda row: 0 if row['BAND'] != 'i ' else row['MAG'],axis=1)
-            lc_df_int_MJD = lc_df.groupby('int_MJD').sum(['BAND_r','BAND_i','BAND_g'])
-            # for i in unique_MJDs:
-            #     unique_r = get_group()
-            band_mask = (lc_df_int_MJD['BAND_r'] != 0) & (lc_df_int_MJD['BAND_g'] != 0) & (lc_df_int_MJD['BAND_i'] != 0)
-            print(lc_df_int_MJD[['BAND_r','BAND_g','BAND_i']])#[lc_df['BAND'] == 'X'])
-        #print(lc_df_pb.ZEROPT)
+            if type(appended_data) == int:
+                appended_data = lc_df.copy()
+            else:
+                appended_data = pandas.concat([appended_data, lc_df])
+    
+    return masked_data(appended_data)
 
-        #                 if plotmag:
-        #                     plt.errorbar(lc_df_pb['MJD']-lc.meta['MJD_TRIGGER'], lc_df_pb['MAG'], 
-        #                              yerr=lc_df_pb['MAGERR'], c=c, fmt='o', label=pb, ms=7, elinewidth=2)
+def masked_data(df):
+    df['int_MJD'] = df['MJD'].astype(int)
+    df['norm_MJD'] = (df['MJD'] / 3).astype(int)
+    df['BAND_r'] = df.apply(lambda row: 0 if row['BAND'] != 'r ' else row['MAG'],axis=1)
+    df['BAND_g'] = df.apply(lambda row: 0 if row['BAND'] != 'g ' else row['MAG'],axis=1)
+    df['BAND_i'] = df.apply(lambda row: 0 if row['BAND'] != 'i ' else row['MAG'],axis=1)
+    lc_df_int_MJD = df.groupby('norm_MJD').sum(['BAND_r','BAND_i','BAND_g'])
+    band_mask = (lc_df_int_MJD['BAND_r'] != 0) & (lc_df_int_MJD['BAND_g'] != 0) & (lc_df_int_MJD['BAND_i'] != 0)
+    return lc_df_int_MJD[band_mask]
 
-        #                 else:
-        #                     plt.errorbar(lc_df_pb['MJD']-lc.meta['MJD_TRIGGER'], lc_df_pb['FLUXCAL'], 
-        #                              yerr=lc_df_pb['FLUXCALERR'], c=c, fmt='o', label=pb, ms=7, elinewidth=2)
-
-
-        #             if plotmag:
-        #                 plt.gca().invert_yaxis()
-        #                 plt.ylabel('Mag')
-
-        #             else:
-        #                 plt.ylabel('Flux')
-
-        #             plt.show()
-        # appended_meta_data = pandas.concat(appended_meta_data)
-        appended_data.append(appended_data)
-    return appended_data
-
-
-get_data()
+print(get_data())
