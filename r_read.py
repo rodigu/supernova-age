@@ -25,7 +25,7 @@ def get_data():
             phots_list.append(phots[r])
     # print(len(heads_list),heads_list)
     # print(len(phots_list),phots_list)
-    appended_data = []
+    appended_data = -1
 
     for head, phot in zip(heads_list[::100], phots_list[::100]): #lots of LCs per head, phot files, so do a few to start
         i = head.find('_HEAD.FITS.gz')
