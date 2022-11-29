@@ -27,11 +27,13 @@ def get_data():
     # print(len(phots_list),phots_list)
     appended_data = -1
 
-    for head, phot in zip(heads_list[::100], phots_list[::100]): #lots of LCs per head, phot files, so do a few to start
+    skip_size = 100
+    for head, phot in zip(heads_list[::skip_size], phots_list[::skip_size]): #lots of LCs per head, phot files, so do a few to start
         i = head.find('_HEAD.FITS.gz')
         assert head[:i] == phot[:i], f'HEAD and PHOT files name mismatch: {head}, {phot}'
         filename = head[:i].split('/')[1:3]#.split('.')[0:2]
-        for LCnum, lc in enumerate(sncosmo.read_snana_fits(head, phot)[0:3]): # remember: multiple SN in single HEAD/PHOT file
+        num_heads = 200
+        for LCnum, lc in enumerate(sncosmo.read_snana_fits(head, phot)[0:num_heads]): # remember: multiple SN in single HEAD/PHOT file
             lc_meta = {lc.meta['SNID']:lc.meta}
             # print(lc_meta)
             #print(lc.columns)
@@ -73,12 +75,13 @@ def get_data():
 
 def masked_data(df):
     df['int_MJD'] = df['MJD'].astype(int)
-    df['norm_MJD'] = (df['MJD'] / 3).astype(int)
-    df['BAND_r'] = df.apply(lambda row: 0 if row['BAND'] != 'r ' else row['MAG'],axis=1)
-    df['BAND_g'] = df.apply(lambda row: 0 if row['BAND'] != 'g ' else row['MAG'],axis=1)
-    df['BAND_i'] = df.apply(lambda row: 0 if row['BAND'] != 'i ' else row['MAG'],axis=1)
-    lc_df_int_MJD = df.groupby('norm_MJD').sum(['BAND_r','BAND_i','BAND_g'])
-    band_mask = (lc_df_int_MJD['BAND_r'] != 0) & (lc_df_int_MJD['BAND_g'] != 0) & (lc_df_int_MJD['BAND_i'] != 0)
-    return lc_df_int_MJD[band_mask]
+    df['norm_MJD'] = (df['MJD'] / 6).astype(int)
+    df['BAND_r'] = df.apply(lambda row: np.NaN if row['BAND'] != 'r ' else row['MAG'],axis=1)
+    df['BAND_g'] = df.apply(lambda row: np.NaN if row['BAND'] != 'g ' else row['MAG'],axis=1)
+    df['BAND_i'] = df.apply(lambda row: np.NaN if row['BAND'] != 'i ' else row['MAG'],axis=1)
+    lc_df_int_MJD = df.groupby(['SNID', 'norm_MJD']).mean(['BAND_r','BAND_i','BAND_g']).reset_index()
+    band_mask = (~lc_df_int_MJD['BAND_r'].isna()) & (~lc_df_int_MJD['BAND_g'].isna()) & (~lc_df_int_MJD['BAND_i'].isna())
+    return df[df['norm_MJD'].isin(lc_df_int_MJD[band_mask]['norm_MJD'])]
 
-print(get_data())
+df = get_data()
+print(df)
