@@ -20,9 +20,10 @@ def plot_snana_fits(dir_path, plotmag=False):
         filename = head[:i].split('/')[-1].split('.')[0]
 
         for LCnum, lc in enumerate(sncosmo.read_snana_fits(head, phot)[0:5]): # remember: multiple SN in single HEAD/PHOT file
-            print(lc.meta)
-            #print(lc.columns)
+            # print(lc.meta)
+            # print(lc.columns)
             lc_df = lc.to_pandas()
+            print(lc_df.columns)
             
             fig, ax = plt.subplots()
             lc_df['BAND']= lc_df['BAND'].str.decode("utf-8") # turn Bytes into str
@@ -43,27 +44,27 @@ def plot_snana_fits(dir_path, plotmag=False):
                       "z ": u"#656364"} # YSE-z
             lc_df['PLOTCOLOR'] = lc_df.BAND.map(D_id_color)
             
-            for pb, c in D_id_color.items():
-                #print(pb, c)
-                lc_df_pb = lc_df[lc_df.BAND == pb]
-                #print(lc_df_pb.ZEROPT)
+            # for pb, c in D_id_color.items():
+            #     #print(pb, c)
+            #     lc_df_pb = lc_df[lc_df.BAND == pb]
+            #     #print(lc_df_pb.ZEROPT)
             
-                if plotmag:
-                    plt.errorbar(lc_df_pb['MJD']-lc.meta['MJD_TRIGGER'], lc_df_pb['MAG'], 
-                             yerr=lc_df_pb['MAGERR'], c=c, fmt='o', label=pb, ms=7, elinewidth=2)
+            #     if plotmag:
+            #         plt.errorbar(lc_df_pb['MJD']-lc.meta['MJD_TRIGGER'], lc_df_pb['MAG'], 
+            #                  yerr=lc_df_pb['MAGERR'], c=c, fmt='o', label=pb, ms=7, elinewidth=2)
                     
-                else:
-                    plt.errorbar(lc_df_pb['MJD']-lc.meta['MJD_TRIGGER'], lc_df_pb['FLUXCAL'], 
-                             yerr=lc_df_pb['FLUXCALERR'], c=c, fmt='o', label=pb, ms=7, elinewidth=2)
+            #     else:
+            #         plt.errorbar(lc_df_pb['MJD']-lc.meta['MJD_TRIGGER'], lc_df_pb['FLUXCAL'], 
+            #                  yerr=lc_df_pb['FLUXCALERR'], c=c, fmt='o', label=pb, ms=7, elinewidth=2)
                 
                 
-            if plotmag:
-                plt.gca().invert_yaxis()
-                plt.ylabel('Mag')
+            # if plotmag:
+            #     plt.gca().invert_yaxis()
+            #     plt.ylabel('Mag')
                 
-            else:
-                plt.ylabel('Flux')
+            # else:
+            #     plt.ylabel('Flux')
                 
-            plt.show()
+            # plt.show()
     
     return
