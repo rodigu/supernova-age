@@ -1,2 +1,9 @@
 /data/*
 /__pycache__/*
+*.gz
+*.DUMP
+*.LIST
+*.README
+.DS_Store
+/data/*
+
