@@ -7,6 +7,8 @@ import numpy as np
 import matplotlib.pyplot as plt
 import pandas
 
+NUM_DAYS = 2 # modify this to check results with 1 day precision
+
 def get_data():
     models = os.listdir('data/')[1::]
     heads_list = []
@@ -54,7 +56,7 @@ def get_data():
             lc_df['MAGERR'] = 1.086/lc_df['SNR'] # magnitude error
             
                     # observations              # nondetections           # Signal to noise cut       
-            mask = (lc_df['PHOTFLAG'] != 0)  #| (lc_df['PHOTFLAG'] == 0)  | (lc_df['SNR'] >= 4) 
+            mask = ((lc_df['PHOTFLAG'] != 0) | (lc_df['SNR'] >= 4))  #| (lc_df['PHOTFLAG'] == 0)  | (lc_df['SNR'] >= 4) 
             lc_df = lc_df[mask].reset_index(drop=True)
             
             D_id_color = {
@@ -75,13 +77,32 @@ def get_data():
 
 def masked_data(df):
     df['int_MJD'] = df['MJD'].astype(int)
-    df['norm_MJD'] = (df['MJD'] / 6).astype(int)
+    df['norm_MJD'] = (df['MJD'] / NUM_DAYS).astype(int)
     df['BAND_r'] = df.apply(lambda row: np.NaN if row['BAND'] != 'r ' else row['MAG'],axis=1)
     df['BAND_g'] = df.apply(lambda row: np.NaN if row['BAND'] != 'g ' else row['MAG'],axis=1)
     df['BAND_i'] = df.apply(lambda row: np.NaN if row['BAND'] != 'i ' else row['MAG'],axis=1)
-    lc_df_int_MJD = df.groupby(['SNID', 'norm_MJD']).mean(['BAND_r','BAND_i','BAND_g']).reset_index()
-    band_mask = (~lc_df_int_MJD['BAND_r'].isna()) & (~lc_df_int_MJD['BAND_g'].isna()) & (~lc_df_int_MJD['BAND_i'].isna())
-    return df[df['norm_MJD'].isin(lc_df_int_MJD[band_mask]['norm_MJD'])]
+    return df
+    # # print('Unique SNID sample: ', df['SNID'].nunique())
+    # lc_df_int_MJD = df.groupby(['SNID', 'norm_MJD']).mean(['BAND_r','BAND_i','BAND_g']).reset_index()
+    # band_mask = (~lc_df_int_MJD['BAND_r'].isna()) & (~lc_df_int_MJD['BAND_g'].isna()) & (~lc_df_int_MJD['BAND_i'].isna())
+    # return df[df['norm_MJD'].isin(lc_df_int_MJD[band_mask]['norm_MJD'])]
 
-df = get_data()
-print(df)
+def average_bands(df):
+    snid_df = df.groupby('SNID').mean(numeric_only=True)
+    return snid_df.dropna()
+
+def run_pipeline(days_range=2):
+    global NUM_DAYS
+    NUM_DAYS = days_range
+    df = get_data()[['1stDet', 'BAND_r', 'BAND_i', 'BAND_g', 'MJD', 'SNID']]
+    df = average_bands(df)
+    return df
+
+if __name__ == '__main__':
+    df = run_pipeline(1)
+    df.to_csv(f'./out/output_{NUM_DAYS}.csv') 
+# print('Unique SNID 2 day: ', df['SNID'].nunique())
+
+# take average of days
+
+# plt.scatter(x = df['BAND_r']-df['BAND_i'], y )

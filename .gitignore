@@ -5,5 +5,5 @@
 *.LIST
 *.README
 .DS_Store
-/data/*
+/out/*
 
