@@ -29,13 +29,14 @@ def get_data():
     # print(len(phots_list),phots_list)
     appended_data = -1
 
-    skip_size = 100
-    for head, phot in zip(heads_list[::skip_size], phots_list[::skip_size]): #lots of LCs per head, phot files, so do a few to start
+    # skip_size = 100
+    for head, phot in zip(heads_list[::], phots_list[::]): #lots of LCs per head, phot files, so do a few to start
+            #for head, phot in zip(heads_list[::skip_size], phots_list[::skip_size]):
         i = head.find('_HEAD.FITS.gz')
         assert head[:i] == phot[:i], f'HEAD and PHOT files name mismatch: {head}, {phot}'
         filename = head[:i].split('/')[1:3]#.split('.')[0:2]
-        num_heads = 200
-        for LCnum, lc in enumerate(sncosmo.read_snana_fits(head, phot)[0:num_heads]): # remember: multiple SN in single HEAD/PHOT file
+        # num_heads = 200
+        for LCnum, lc in enumerate(sncosmo.read_snana_fits(head, phot)):#[0:num_heads]): # remember: multiple SN in single HEAD/PHOT file
             lc_meta = {lc.meta['SNID']:lc.meta}
             # print(lc_meta)
             #print(lc.columns)
@@ -99,7 +100,7 @@ def run_pipeline(days_range=2):
     return df
 
 if __name__ == '__main__':
-    df = run_pipeline(1)
+    df = run_pipeline(2)
     df.to_csv(f'./out/output_{NUM_DAYS}.csv') 
 # print('Unique SNID 2 day: ', df['SNID'].nunique())
 
