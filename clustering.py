@@ -33,6 +33,7 @@ def cluster_df():
   _, _, _, clustering = run_spectral_clustering_2d(df, 10)
   new_df = df.copy()
   new_df['cluster'] = clustering
+  return new_df
 
 def write_cluster(df, filename):
   df.to_csv(filename)
