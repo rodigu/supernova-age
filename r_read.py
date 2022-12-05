@@ -7,13 +7,12 @@ import numpy as np
 import matplotlib.pyplot as plt
 import pandas
 
-NUM_DAYS = 2 # modify this to check results with 1 day precision
-
-def get_data():
-    models = os.listdir('data/')[1::]
+def get_data(save_raw=False, days_range=1):
+    models = os.listdir('data/')[::]
     heads_list = []
     phots_list = []
     for model in models:
+        print('Current Model: ', model)
         heads = sorted(glob.glob(os.path.join(f'data/{model}', '*_HEAD.FITS.gz')))
         phots = sorted(glob.glob(os.path.join(f'data/{model}', '*_PHOT.FITS.gz')))
         assert len(heads) != 0, 'no *_HEAD_FITS.gz are found'
@@ -29,13 +28,15 @@ def get_data():
     # print(len(phots_list),phots_list)
     appended_data = -1
 
-    skip_size = 100
-    for head, phot in zip(heads_list[::skip_size], phots_list[::skip_size]): #lots of LCs per head, phot files, so do a few to start
+    # skip_size = 100
+    for head, phot in zip(heads_list[::], phots_list[::]): #lots of LCs per head, phot files, so do a few to start
         i = head.find('_HEAD.FITS.gz')
         assert head[:i] == phot[:i], f'HEAD and PHOT files name mismatch: {head}, {phot}'
         filename = head[:i].split('/')[1:3]#.split('.')[0:2]
-        num_heads = 200
-        for LCnum, lc in enumerate(sncosmo.read_snana_fits(head, phot)[0:num_heads]): # remember: multiple SN in single HEAD/PHOT file
+        # num_heads = 200
+        print('Current file: ', filename)
+        for LCnum, lc in enumerate(sncosmo.read_snana_fits(head, phot)): # remember: multiple SN in single HEAD/PHOT file
+            print('LCnum: ', LCnum)
             lc_meta = {lc.meta['SNID']:lc.meta}
             # print(lc_meta)
             #print(lc.columns)
@@ -73,14 +74,18 @@ def get_data():
             else:
                 appended_data = pandas.concat([appended_data, lc_df])
     
-    return masked_data(appended_data)
+    return masked_data(appended_data, save_raw, days_range)
 
-def masked_data(df):
+def masked_data(df, save_raw=False, days_range=1):
     df['int_MJD'] = df['MJD'].astype(int)
-    df['norm_MJD'] = (df['MJD'] / NUM_DAYS).astype(int)
+    df['norm_MJD'] = (df['MJD'] / days_range).astype(int)
     df['BAND_r'] = df.apply(lambda row: np.NaN if row['BAND'] != 'r ' else row['MAG'],axis=1)
     df['BAND_g'] = df.apply(lambda row: np.NaN if row['BAND'] != 'g ' else row['MAG'],axis=1)
     df['BAND_i'] = df.apply(lambda row: np.NaN if row['BAND'] != 'i ' else row['MAG'],axis=1)
+    if save_raw:
+        df['BAND_X'] = df.apply(lambda row: np.NaN if row['BAND'] != 'X ' else row['MAG'],axis=1)
+        df['BAND_Y'] = df.apply(lambda row: np.NaN if row['BAND'] != 'Y ' else row['MAG'],axis=1)
+        df['BAND_z'] = df.apply(lambda row: np.NaN if row['BAND'] != 'z ' else row['MAG'],axis=1)
     return df
     # # print('Unique SNID sample: ', df['SNID'].nunique())
     # lc_df_int_MJD = df.groupby(['SNID', 'norm_MJD']).mean(['BAND_r','BAND_i','BAND_g']).reset_index()
@@ -91,16 +96,18 @@ def average_bands(df):
     snid_df = df.groupby('SNID').mean(numeric_only=True)
     return snid_df.dropna()
 
-def run_pipeline(days_range=2):
-    global NUM_DAYS
-    NUM_DAYS = days_range
-    df = get_data()[['1stDet', 'BAND_r', 'BAND_i', 'BAND_g', 'MJD', 'SNID']]
-    df = average_bands(df)
+def run_pipeline(days_range=1, save_raw=False):
+    df = get_data(save_raw, days_range)
+    if save_raw:
+        return df
+    df = average_bands(df[['1stDet', 'BAND_r', 'BAND_i', 'BAND_g', 'MJD', 'SNID']])
     return df
 
 if __name__ == '__main__':
-    df = run_pipeline(1)
-    df.to_csv(f'./out/output_{NUM_DAYS}.csv') 
+    print('Running')
+    day_range = 1
+    df = run_pipeline(day_range)
+    df.to_csv(f'./out/output_{day_range}.csv') 
 # print('Unique SNID 2 day: ', df['SNID'].nunique())
 
 # take average of days
