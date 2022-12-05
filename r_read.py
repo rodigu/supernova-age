@@ -36,12 +36,14 @@ def get_data():
         assert head[:i] == phot[:i], f'HEAD and PHOT files name mismatch: {head}, {phot}'
         filename = head[:i].split('/')[1:3]#.split('.')[0:2]
         # num_heads = 200
+        print(f'Current File: {filename}')
         for LCnum, lc in enumerate(sncosmo.read_snana_fits(head, phot)):#[0:num_heads]): # remember: multiple SN in single HEAD/PHOT file
             lc_meta = {lc.meta['SNID']:lc.meta}
-            # print(lc_meta)
+            
+            print(f'LCnum: {LCnum}')
             #print(lc.columns)
             lc_df = lc.to_pandas()
-
+            
             # lc_df_meta = pandas.DataFrame.from_dict(lc_meta,orient='columns')
 
             lc_df['SNID']=lc.meta['SNID']
