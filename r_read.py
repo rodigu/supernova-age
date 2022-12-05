@@ -108,7 +108,7 @@ if __name__ == '__main__':
     print('Running')
     day_range = 1
     df = run_pipeline(day_range)
-    df.to_csv(f'./out/output_{day_range}.csv') 
+    df.to_csv(f'./out/output_{day_range}.csv')
 # print('Unique SNID 2 day: ', df['SNID'].nunique())
 
 # take average of days
