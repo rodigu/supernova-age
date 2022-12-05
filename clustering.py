@@ -28,12 +28,24 @@ def plot_clustering_2d(xs, ys, matrix, clustering, df):
   # plt.scatter(x=xs, y=ys, c=clustering, s=30, cmap='tab10')
   plt.scatter(x=xs, y=ys, c=df['days_since'].astype(int), s=20, cmap='tab10', alpha = .5)
 
-  
+def cluster_df():
+  df = add_axis_subtraction(load_df())
+  _, _, _, clustering = run_spectral_clustering_2d(df, 10)
+  new_df = df.copy()
+  new_df['cluster'] = clustering
+
+def write_cluster(df, filename):
+  df.to_csv(filename)
 
 def load_df(filename='./out/output_1.csv'):
   return pd.read_csv(filename)
 
 if __name__ == '__main__':
-  df = add_axis_subtraction(load_df())
-  xs, ys, matrix, clustering = run_spectral_clustering_2d(df, 10)
-  plot_clustering_2d(xs, ys, matrix, clustering, df)
+  # df = add_axis_subtraction(load_df())
+  # xs, ys, matrix, clustering = run_spectral_clustering_2d(df, 10)
+  # plot_clustering_2d(xs, ys, matrix, clustering, df)
+  # new_df = df.copy()
+  # new_df['cluster'] = clustering
+  # print(new_df)
+  df = cluster_df()
+  write_cluster(df, './out/cluster_df')
