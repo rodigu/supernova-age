@@ -1,5 +1,7 @@
 import pandas as pd
 import matplotlib.pyplot as plt
+import numpy as np
+import sklearn
 
 filename = './out/output_1.csv'
 two_days = pd.read_csv(filename)
