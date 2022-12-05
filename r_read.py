@@ -38,10 +38,11 @@ def get_data(save_raw=False, days_range=1):
         for LCnum, lc in enumerate(sncosmo.read_snana_fits(head, phot)[:num_heads]): # remember: multiple SN in single HEAD/PHOT file
             print('LCnum: ', LCnum)
             lc_meta = {lc.meta['SNID']:lc.meta}
-            # print(lc_meta)
+            
+            print(f'LCnum: {LCnum}')
             #print(lc.columns)
             lc_df = lc.to_pandas()
-
+            
             # lc_df_meta = pandas.DataFrame.from_dict(lc_meta,orient='columns')
 
             lc_df['SNID']=lc.meta['SNID']
