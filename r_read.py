@@ -28,14 +28,14 @@ def get_data(save_raw=False, days_range=1):
     # print(len(phots_list),phots_list)
     appended_data = -1
 
-    # skip_size = 100
-    for head, phot in zip(heads_list[::], phots_list[::]): #lots of LCs per head, phot files, so do a few to start
+    skip_size = 100
+    for head, phot in zip(heads_list[::skip_size], phots_list[::skip_size]): #lots of LCs per head, phot files, so do a few to start
         i = head.find('_HEAD.FITS.gz')
         assert head[:i] == phot[:i], f'HEAD and PHOT files name mismatch: {head}, {phot}'
         filename = head[:i].split('/')[1:3]#.split('.')[0:2]
-        # num_heads = 200
+        num_heads = 200
         print('Current file: ', filename)
-        for LCnum, lc in enumerate(sncosmo.read_snana_fits(head, phot)): # remember: multiple SN in single HEAD/PHOT file
+        for LCnum, lc in enumerate(sncosmo.read_snana_fits(head, phot)[:num_heads]): # remember: multiple SN in single HEAD/PHOT file
             print('LCnum: ', LCnum)
             lc_meta = {lc.meta['SNID']:lc.meta}
             # print(lc_meta)
