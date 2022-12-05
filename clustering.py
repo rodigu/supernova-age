@@ -8,7 +8,7 @@ def add_axis_subtraction(df):
   df['g-r'] = df['BAND_g'] - df['BAND_r']
   df['days_since'] = df['MJD'] - df['1stDet']
   
-  df = df[df['days_since'] < 10]
+  df = df[df['days_since'] < 15]
   return df
 
 def run_spectral_clustering_2d(df, cluster_num):
@@ -28,9 +28,9 @@ def plot_clustering_2d(xs, ys, matrix, clustering, df):
   # plt.scatter(x=xs, y=ys, c=clustering, s=30, cmap='tab10')
   plt.scatter(x=xs, y=ys, c=df['days_since'].astype(int), s=20, cmap='tab10', alpha = .5)
 
-def cluster_df():
-  df = add_axis_subtraction(load_df())
-  _, _, _, clustering = run_spectral_clustering_2d(df, 10)
+def cluster_df(filename, num_clusters):
+  df = add_axis_subtraction(load_df(filename))
+  _, _, _, clustering = run_spectral_clustering_2d(df, num_clusters)
   new_df = df.copy()
   new_df['cluster'] = clustering
   return new_df
