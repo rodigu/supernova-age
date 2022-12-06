@@ -4,13 +4,14 @@ import matplotlib.pyplot as plt
 import pandas as pd
 
 def add_axis_subtraction(df):
+  if len(df.index) > 100000:
+    df = df.sample(n=50000)
   df['r-i'] = df['BAND_r'] - df['BAND_i']
   df['g-r'] = df['BAND_g'] - df['BAND_r']
   df['days_since'] = df['MJD'] - df['1stDet']
   
   df = df[df['days_since'] < 15]
-  if len(df.index) > 100000:
-    df = df.sample(n=1000)
+  
   return df
 
 def run_spectral_clustering_2d(df, cluster_num):
@@ -50,5 +51,5 @@ if __name__ == '__main__':
   # new_df = df.copy()
   # new_df['cluster'] = clustering
   # print(new_df)
-  df = cluster_df()
+  df = cluster_df('two_day_range.csv',7)
   write_cluster(df, './out/cluster_df')
