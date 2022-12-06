@@ -6,7 +6,7 @@ def cluster_eval(df):
   max_days = 15
   num_clusters = len(df['cluster'].unique())
   step_size = int(max_days/ num_clusters)
-  ranges = [{'min': i * step_size, 'max': (i + 1) * step_size} for i in range(num_clusters)] #why can't we do just 3 ranges?
+  ranges = [{'min': i * step_size, 'max': (i + 1) * step_size} for i in range(num_clusters)]
   cluster_proportions = { cluster: [0] * len(ranges) for cluster in range(num_clusters) }
   print(ranges)
   for ck in cluster_proportions.keys(): # for each cluster
@@ -21,7 +21,7 @@ def cluster_eval(df):
 
 if __name__ == '__main__':
   filename='two_day_range.csv'
-  num_clusters=3
+  num_clusters=7
   df = cluster_df(filename, num_clusters)
   print(len(df.index))
   evaluation = cluster_eval(df)[0]
@@ -34,7 +34,7 @@ if __name__ == '__main__':
     cluster_ratio_list = []
     for i, count in enumerate(evaluation[c]):
       print('range       proportion')
-      print(f'{i}      {count / total}') #Problem here beause range row totals 100% instead of column totaling 100%
+      print(f'{i}      {count / total}') 
 
       ratio = count / total
       cluster_ratio_list.append(ratio)
