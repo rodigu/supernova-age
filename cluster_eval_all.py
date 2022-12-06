@@ -6,7 +6,7 @@ def cluster_eval(df):
   max_days = 15
   num_clusters = len(df['cluster'].unique())
   step_size = int(max_days/ num_clusters)
-  ranges = [{'min': i * step_size, 'max': (i + 1) * step_size} for i in range(num_clusters)] #why can't we do just 3 ranges?
+  ranges = [{'min': i * step_size, 'max': (i + 1) * step_size} for i in range(num_clusters)]
   cluster_proportions = { cluster: [0] * len(ranges) for cluster in range(num_clusters) }
   for ck in cluster_proportions.keys(): # for each cluster
     for idx, r in enumerate(ranges): # for each possible range
@@ -51,7 +51,7 @@ def plot_cluster_proportions(clusters_evaluations):
 
 if __name__ == '__main__':
   filename='two_day_range.csv'
-  num_clusters=3
+  num_clusters=7
   df = cluster_df(filename, num_clusters)
   print(len(df.index))
   cluster_ratio_df, ranges = cluster_eval(df)
