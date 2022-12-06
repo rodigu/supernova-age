@@ -4,8 +4,6 @@ import matplotlib.pyplot as plt
 import pandas as pd
 
 def add_axis_subtraction(df):
-  if len(df.index) > 100000:
-    df = df.sample(n=50000)
   df['r-i'] = df['BAND_r'] - df['BAND_i']
   df['g-r'] = df['BAND_g'] - df['BAND_r']
   df['days_since'] = df['MJD'] - df['1stDet']
@@ -42,7 +40,7 @@ def write_cluster(df, filename):
   df.to_csv(filename)
 
 def load_df(filename='./out/output_1.csv'):
-  return pd.read_csv(filename)
+  return pd.read_csv(filename, nrows=1000)
 
 if __name__ == '__main__':
   # df = add_axis_subtraction(load_df())
