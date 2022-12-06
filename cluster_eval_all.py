@@ -17,8 +17,16 @@ def cluster_eval(df):
   return cluster_proportions
 
 
+def evaluation_to_df(evaluation):
+  pass
+
+
+def plot_cluster_proportions(clusters_evaluations):
+  pass
+
+
 if __name__ == '__main__':
-  df = cluster_df(filename='./out/output_1.csv', num_clusters=3)
+  df = cluster_df(filename='./out/output_1.csv', num_clusters=5)
   print(df)
   evaluation = cluster_eval(df)
   for c in evaluation.keys():
