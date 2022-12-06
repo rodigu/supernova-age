@@ -19,6 +19,14 @@ def cluster_eval(df):
   return cluster_proportions,ranges
 
 
+def evaluation_to_df(evaluation):
+  pass
+
+
+def plot_cluster_proportions(clusters_evaluations):
+  pass
+
+
 if __name__ == '__main__':
   filename='two_day_range.csv'
   num_clusters=7
