@@ -9,6 +9,8 @@ def add_axis_subtraction(df):
   df['days_since'] = df['MJD'] - df['1stDet']
   
   df = df[df['days_since'] < 15]
+  if len(df.index) > 100000:
+    df = df.sample(n=1000)
   return df
 
 def run_spectral_clustering_2d(df, cluster_num):

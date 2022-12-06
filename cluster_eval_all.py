@@ -23,7 +23,7 @@ if __name__ == '__main__':
   filename='two_day_range.csv'
   num_clusters=4
   df = cluster_df(filename, num_clusters)
-  # print(df)
+  print(len(df.index))
   evaluation = cluster_eval(df)
   all_cluster_ratio_list = []
   print(len(list(evaluation.keys())))
