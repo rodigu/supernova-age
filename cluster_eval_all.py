@@ -75,7 +75,7 @@ def heatmap_proportions(clusters_evaluations,filename):
   return plt.show()
 
 if __name__ == '__main__':
-  filename='two_day_range.csv'
+  filename='one_day_out.csv'
   num_clusters=5
   df = cluster_df(filename, num_clusters)
   # print(len(df.index))
