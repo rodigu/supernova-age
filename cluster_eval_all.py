@@ -45,8 +45,8 @@ def to_percent_in_cluster(df):
   #     df.loc[r][cluster] = df.loc[r][cluster] / total
   return new_df
 
-def scatter_plot(df,filename):
-  plt.scatter(df, x = 'r-i', y = 'g-r', c = 'cluster')
+def cluster_scatter_plot(df,filename):
+  plt.scatter(x = df['r-i'], y = df['g-r'], c = df['cluster'])
   return plt.show()
 
 def heatmap_proportions(clusters_evaluations,filename):
@@ -84,6 +84,6 @@ if __name__ == '__main__':
   print(cluster_ratio_df)
   heatmap_proportions(cluster_ratio_df,filename)
   hist_plot_cluster_proportions(cluster_ratio_df)
-  scatter_plot(df,filename)
+  cluster_scatter_plot(df,filename)
   plt.show()
   

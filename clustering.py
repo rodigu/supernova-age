@@ -23,16 +23,20 @@ def run_spectral_clustering_2d(df, cluster_num):
     random_state=0).fit(matrix)
   return xs, ys, matrix, clustering.labels_
 
-def plot_clustering_2d(xs, ys, matrix, clustering, df):
+def plot_clustering_2d(df):
 
-  print(len(xs), len(df['days_since']))
   # plt.figure(1,2,1)
   
   # plt.scatter(x=xs, y=ys, c=clustering, s=30, cmap='tab10')
-  plt.scatter(x=xs, y=ys, c=df['days_since'].astype(int), s=20, cmap='tab10', alpha = .5)
+  plt.scatter(x=df['r-i'], y=df['g-r'], c=df['days_since'].astype(int), s=20, cmap='tab10', alpha = .5)
+  plt.colorbar()
+  plt.xlabel('r-i')
+  plt.ylabel('g-r')
+  plt.show()
 
 def cluster_df(filename, num_clusters):
   df = add_axis_subtraction(load_df(filename))
+  plot_clustering_2d(df)
   _, _, _, clustering = run_spectral_clustering_2d(df, num_clusters)
   new_df = df.copy()
   new_df['cluster'] = clustering
@@ -41,7 +45,7 @@ def cluster_df(filename, num_clusters):
 def write_cluster(df, filename):
   df.to_csv(filename)
 
-def load_df(filename='./out/output_1.csv'):
+def load_df(filename):
   return pd.read_csv(filename)
 
 if __name__ == '__main__':
