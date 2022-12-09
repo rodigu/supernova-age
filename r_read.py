@@ -38,15 +38,15 @@ def get_data(save_raw=False, days_range=1):
             "i ": u"#832db6", # YSE-i
             "z ": u"#656364"} # YSE-z
 
-    skip_size = 50
-    for head, phot in zip(heads_list[::skip_size], phots_list[::skip_size]): #lots of LCs per head, phot files, so do a few to start
+    # skip_size = 50
+    for head, phot in zip(heads_list, phots_list): #lots of LCs per head, phot files, so do a few to start
         i = head.find('_HEAD.FITS.gz')
         assert head[:i] == phot[:i], f'HEAD and PHOT files name mismatch: {head}, {phot}'
         filename = head[:i].split('/')[1:3]#.split('.')[0:2]
-        num_heads = 200
+        # num_heads = 200
         print('Current file: ', filename)
         start_time = time.time()
-        for LCnum, lc in enumerate(sncosmo.read_snana_fits(head, phot)[:num_heads]): # remember: multiple SN in single HEAD/PHOT file
+        for LCnum, lc in enumerate(sncosmo.read_snana_fits(head, phot)): # remember: multiple SN in single HEAD/PHOT file
             lc_meta = {lc.meta['SNID']:lc.meta}
             
             #print(lc.columns)
