@@ -36,10 +36,8 @@ def get_data(save_raw=False, days_range=1):
         num_heads = 200
         print('Current file: ', filename)
         for LCnum, lc in enumerate(sncosmo.read_snana_fits(head, phot)[:num_heads]): # remember: multiple SN in single HEAD/PHOT file
-            print('LCnum: ', LCnum)
             lc_meta = {lc.meta['SNID']:lc.meta}
             
-            print(f'LCnum: {LCnum}')
             #print(lc.columns)
             lc_df = lc.to_pandas()
             
@@ -80,33 +78,31 @@ def get_data(save_raw=False, days_range=1):
 def masked_data(df, save_raw=False, days_range=1):
     df['int_MJD'] = df['MJD'].astype(int)
     df['norm_MJD'] = (df['MJD'] / days_range).astype(int)
-    df['BAND_r'] = df.apply(lambda row: np.NaN if row['BAND'] != 'r ' else row['MAG'],axis=1)
-    df['BAND_g'] = df.apply(lambda row: np.NaN if row['BAND'] != 'g ' else row['MAG'],axis=1)
-    df['BAND_i'] = df.apply(lambda row: np.NaN if row['BAND'] != 'i ' else row['MAG'],axis=1)
-    if save_raw:
-        df['BAND_X'] = df.apply(lambda row: np.NaN if row['BAND'] != 'X ' else row['MAG'],axis=1)
-        df['BAND_Y'] = df.apply(lambda row: np.NaN if row['BAND'] != 'Y ' else row['MAG'],axis=1)
-        df['BAND_z'] = df.apply(lambda row: np.NaN if row['BAND'] != 'z ' else row['MAG'],axis=1)
+    for b in BAND_CHOICE:
+        df[b] = df.apply(lambda row: np.NaN if row['BAND'] != f'{b[-1]} ' else row['MAG'],axis=1)
     return df
-    # # print('Unique SNID sample: ', df['SNID'].nunique())
-    # lc_df_int_MJD = df.groupby(['SNID', 'norm_MJD']).mean(['BAND_r','BAND_i','BAND_g']).reset_index()
-    # band_mask = (~lc_df_int_MJD['BAND_r'].isna()) & (~lc_df_int_MJD['BAND_g'].isna()) & (~lc_df_int_MJD['BAND_i'].isna())
-    # return df[df['norm_MJD'].isin(lc_df_int_MJD[band_mask]['norm_MJD'])]
+    # print('Unique SNID sample: ', df['SNID'].nunique())
+    lc_df_int_MJD = df.groupby(['SNID', 'norm_MJD']).mean(['BAND_r','BAND_i','BAND_g']).reset_index()
+    band_mask = (~lc_df_int_MJD['BAND_r'].isna()) & (~lc_df_int_MJD['BAND_g'].isna()) & (~lc_df_int_MJD['BAND_i'].isna())
+    return df[df['norm_MJD'].isin(lc_df_int_MJD[band_mask]['norm_MJD'])]
 
 def average_bands(df):
-    snid_df = df.groupby('SNID').mean(numeric_only=True)
+    snid_df = df.groupby(['SNID', 'norm_MJD']).mean(numeric_only=True).reset_index().set_index('SNID')
     return snid_df.dropna()
 
 def run_pipeline(days_range=1, save_raw=False):
     df = get_data(save_raw, days_range)
-    if save_raw:
-        return df
-    df = average_bands(df[['1stDet', 'BAND_r', 'BAND_i', 'BAND_g', 'MJD', 'SNID']])
-    return df
+    adf = average_bands(df[['1stDet', 'MJD', 'norm_MJD', 'SNID', *BAND_CHOICE]])
+    print(f'Usable data: {len(adf) / len(df): .3}')
+    print(f'Total usable: {len(adf)}, out of {len(df)}')
+    return adf
+
+BAND_CHOICE = ['BAND_r', 'BAND_i', 'BAND_g']
+DAY_RANGE = 2
 
 if __name__ == '__main__':
     print('Running')
-    day_range = 1
+    day_range = DAY_RANGE
     df = run_pipeline(day_range)
     df.to_csv(f'./out/output_{day_range}.csv')
 # print('Unique SNID 2 day: ', df['SNID'].nunique())

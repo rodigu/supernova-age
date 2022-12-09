@@ -1,4 +1,4 @@
-from clustering import cluster_df
+from clustering import cluster_df, cluster_df_3d
 import pandas as pd
 import matplotlib.pyplot as plt
 import numpy as np
@@ -6,9 +6,9 @@ import numpy as np
 def cluster_eval(df):
   max_days = 15
   num_clusters = len(df['cluster'].unique())
-  step_size = int(max_days / num_clusters)
+  step_size = max_days / num_clusters
   ranges = [{'min': i * step_size, 'max': (i + 1) * step_size} for i in range(num_clusters)]
-  print(num_clusters)
+  # print(num_clusters)
   cluster_proportions = { cluster: [0] * len(ranges) for cluster in range(num_clusters) }
   for idx, r in enumerate(ranges):
     for cluster in cluster_proportions.keys(): # for each cluster
@@ -30,9 +30,9 @@ def range_string(num_clusters):
   return [f"{i * step_size} to {(i + 1) * step_size}" for i in range(num_clusters)]
 
 
-def hist_plot_cluster_proportions(df):
-  bins = range_string(len(df.columns))
-  print(bins)
+def hist_plot_cluster_proportions(in_df):
+  df = in_df.transpose()
+
   df.plot(kind='bar', rot=45)
   plt.show()
 
@@ -52,19 +52,19 @@ def cluster_scatter_plot(df,filename):
 def heatmap_proportions(clusters_evaluations,filename):
   num_clusters = len(clusters_evaluations.columns)
   fig, ax = plt.subplots()
-  print(len(clusters_evaluations.index))
+  # print(len(clusters_evaluations.index))
   im = ax.imshow(clusters_evaluations)
 
   # Show all ticks and label them with the respective list entries
-  print([n for n in range(0,num_clusters)])
+  # print([n for n in range(0,num_clusters)])
   rows = [int(rng.split(' ')[-1]) for rng in clusters_evaluations.index]
   columns = [n for n in range(0,num_clusters)]
-  print(rows, len(rows))
+  # print(rows, len(rows))
   ax.set_xticks([int(cluster) for cluster in columns], labels= columns)
   ax.set_yticks(range(len(rows)),labels = rows) #[row/num_clusters for row in rows]
   ax.set_ylabel('Ranges')
   ax.set_xlabel('Cluster')
-  print(ax.get_xticks(),ax.get_yticks())
+  # print(ax.get_xticks(),ax.get_yticks())
   # Rotate the tick labels and set their alignment.
   plt.setp(ax.get_xticklabels(), rotation=45, ha="right",
           rotation_mode="anchor")
@@ -77,13 +77,17 @@ def heatmap_proportions(clusters_evaluations,filename):
 if __name__ == '__main__':
   filename='one_day_out.csv'
   num_clusters=5
-  df = cluster_df(filename, num_clusters)
-  # print(len(df.index))
+  df = cluster_df_3d(filename, num_clusters, 20000)
+  actual_cluster_num = len(df['cluster'].unique())
+  # print(df[df['cluster'] < 0])
+
+  # df['cluster'] = df['cluster'] + 1
+  # # print(len(df.index))
   cluster_df, ranges = cluster_eval(df)
-  cluster_ratio_df = to_percent_in_cluster(cluster_df)
-  print(cluster_ratio_df)
-  heatmap_proportions(cluster_ratio_df,filename)
-  hist_plot_cluster_proportions(cluster_ratio_df)
-  cluster_scatter_plot(df,filename)
+  print(df['cluster'].unique())
+  print(df[df['days_since'] <= 2])
+  print(cluster_df)
+  heatmap_proportions(cluster_df,filename)
+  hist_plot_cluster_proportions(cluster_df)
+  # cluster_scatter_plot(df,filename)
   plt.show()
-  
