@@ -6,13 +6,14 @@ import glob
 import numpy as np
 import matplotlib.pyplot as plt
 import pandas
+import time
 
 def get_data(save_raw=False, days_range=1):
     models = os.listdir('data/')[::]
     heads_list = []
     phots_list = []
+    print("Reading models")
     for model in models:
-        print('Current Model: ', model)
         heads = sorted(glob.glob(os.path.join(f'data/{model}', '*_HEAD.FITS.gz')))
         phots = sorted(glob.glob(os.path.join(f'data/{model}', '*_PHOT.FITS.gz')))
         assert len(heads) != 0, 'no *_HEAD_FITS.gz are found'
@@ -28,13 +29,23 @@ def get_data(save_raw=False, days_range=1):
     # print(len(phots_list),phots_list)
     appended_data = -1
 
-    skip_size = 100
+            
+    D_id_color = {
+            "X ": u"#b9ac70", # ZTF-g
+            "Y ": u"#bd1f01", # ZTF-r
+            "g ": u"#4daf4a", # YSE-g
+            "r ": u"#e41a1c", # YSE-r
+            "i ": u"#832db6", # YSE-i
+            "z ": u"#656364"} # YSE-z
+
+    skip_size = 50
     for head, phot in zip(heads_list[::skip_size], phots_list[::skip_size]): #lots of LCs per head, phot files, so do a few to start
         i = head.find('_HEAD.FITS.gz')
         assert head[:i] == phot[:i], f'HEAD and PHOT files name mismatch: {head}, {phot}'
         filename = head[:i].split('/')[1:3]#.split('.')[0:2]
         num_heads = 200
         print('Current file: ', filename)
+        start_time = time.time()
         for LCnum, lc in enumerate(sncosmo.read_snana_fits(head, phot)[:num_heads]): # remember: multiple SN in single HEAD/PHOT file
             lc_meta = {lc.meta['SNID']:lc.meta}
             
@@ -45,8 +56,8 @@ def get_data(save_raw=False, days_range=1):
 
             lc_df['SNID']=lc.meta['SNID']
             lc_df['1stDet']=lc.meta['MJD_DETECT_FIRST']
-            lc_df['Trigger']=lc.meta['MJD_TRIGGER']
-            lc_df['Model_num']=lc.meta['SIM_TYPE_INDEX']
+            # lc_df['Trigger']=lc.meta['MJD_TRIGGER']
+            # lc_df['Model_num']=lc.meta['SIM_TYPE_INDEX']
             # lc_df['filename']=filename[1]
             
             # fig, ax = plt.subplots()
@@ -58,20 +69,19 @@ def get_data(save_raw=False, days_range=1):
                     # observations              # nondetections           # Signal to noise cut       
             mask = ((lc_df['PHOTFLAG'] != 0) | (lc_df['SNR'] >= 4))  #| (lc_df['PHOTFLAG'] == 0)  | (lc_df['SNR'] >= 4) 
             lc_df = lc_df[mask].reset_index(drop=True)
-            
-            D_id_color = {
-                    "X ": u"#b9ac70", # ZTF-g
-                    "Y ": u"#bd1f01", # ZTF-r
-                    "g ": u"#4daf4a", # YSE-g
-                    "r ": u"#e41a1c", # YSE-r
-                    "i ": u"#832db6", # YSE-i
-                    "z ": u"#656364"} # YSE-z
-            lc_df['PLOTCOLOR'] = lc_df.BAND.map(D_id_color)
+            # lc_df['PLOTCOLOR'] = lc_df.BAND.map(D_id_color)
+
+            # dropping supernovas older than 30 days
+            lc_df = lc_df[lc_df['MJD'] - lc_df['1stDet'] < 30]
             
             if type(appended_data) == int:
                 appended_data = lc_df.copy()
             else:
                 appended_data = pandas.concat([appended_data, lc_df])
+        
+        time_taken = time.time() - start_time
+        print((f"   Time taken: {time_taken} seconds"))
+        print("-----")
     
     return masked_data(appended_data, save_raw, days_range)
 
@@ -103,8 +113,17 @@ DAY_RANGE = 2
 if __name__ == '__main__':
     print('Running')
     day_range = DAY_RANGE
+
+    start_time = time.time()
     df = run_pipeline(day_range)
+    print("________________________")
+    print(f'Day range: {DAY_RANGE}')
+    print(f'Bands: {BAND_CHOICE}')
+    print(f"    Total time taken: {time.time() - start_time} seconds")
+
+    start_time = time.time()
     df.to_csv(f'./out/output_{day_range}.csv')
+    print(f"    Time to write file: {time.time() - start_time}")
 # print('Unique SNID 2 day: ', df['SNID'].nunique())
 
 # take average of days
