@@ -57,7 +57,6 @@ def get_data(save_raw=False, days_range=1):
             lc_df['SNID']=lc.meta['SNID']
             lc_df['1stDet']=lc.meta['MJD_DETECT_FIRST']
             # lc_df['Trigger']=lc.meta['MJD_TRIGGER']
-            # lc_df['Model_num']=lc.meta['SIM_TYPE_INDEX']
             # lc_df['filename']=filename[1]
             
             # fig, ax = plt.subplots()
@@ -122,7 +121,7 @@ if __name__ == '__main__':
     print(f"    Total time taken: {time.time() - start_time} seconds")
 
     start_time = time.time()
-    df.to_csv(f'./out/output_{day_range}.csv')
+    df.to_csv(f'./out/output_{day_range}_all.csv')
     print(f"    Time to write file: {time.time() - start_time}")
 # print('Unique SNID 2 day: ', df['SNID'].nunique())
 
