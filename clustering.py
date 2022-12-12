@@ -9,6 +9,8 @@ def add_axis_subtraction(df):
   df['r-i'] = df['BAND_r'] - df['BAND_i']
   df['g-r'] = df['BAND_g'] - df['BAND_r']
   df['days_since'] = df['MJD'] - df['1stDet']
+
+  print(df['BAND_r'].isnull().values.any(), df['BAND_i'].isnull().values.any(), df['BAND_g'].isnull().values.any())
   
   df = df[df['days_since'] < 15]
   
@@ -32,7 +34,6 @@ def plot_clustering_2d(df):
   plt.colorbar()
   plt.xlabel('r-i')
   plt.ylabel('g-r')
-  plt.show()
 
 def run_spectral_clustering_3d(df, cluster_num):
   xs = df['BAND_r']
@@ -78,7 +79,7 @@ if __name__ == '__main__':
   # new_df = df.copy()
   # new_df['cluster'] = clustering
   # print(new_df)
-  df = cluster_df('out/output_1.csv',7)
+  df = cluster_df('output_1.csv',7)
   write_cluster(df, './out/cluster_df')
   plot_clustering_2d(df)
   # df = cluster_df_3d('out/output_1.csv', 5, 10000)
