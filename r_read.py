@@ -122,7 +122,7 @@ if __name__ == '__main__':
     print(f"    Total time taken: {time.time() - start_time} seconds")
 
     start_time = time.time()
-    df.to_csv(f'./out/output_{day_range}.csv')
+    df.to_csv(f'./out/output_{day_range}_all.csv')
     print(f"    Time to write file: {time.time() - start_time}")
 # print('Unique SNID 2 day: ', df['SNID'].nunique())
 
