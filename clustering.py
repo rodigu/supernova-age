@@ -28,11 +28,11 @@ def plot_clustering_2d(df):
   # plt.figure(1,2,1)
   
   # plt.scatter(x=xs, y=ys, c=clustering, s=30, cmap='tab10')
-  plt.scatter(x=df['r-i'], y=df['g-r'], c=df['days_since'].astype(int), s=20, cmap='RdGy', alpha = .5)
+  plt.axes().set_facecolor("black")
+  plt.scatter(x=df['r-i'], y=df['g-r'], c=df['days_since'].astype(int), s=20, cmap='bwr', alpha=.9)
   plt.colorbar()
   plt.xlabel('r-i')
   plt.ylabel('g-r')
-  plt.show()
 
 def run_spectral_clustering_3d(df, cluster_num):
   xs = df['BAND_r']
@@ -47,7 +47,8 @@ def plot_clustering_3d(df, coloring):
   fig = plt.figure()
   ax = fig.add_subplot(projection='3d')
 
-  ax.scatter(df['BAND_r'], df['BAND_g'], df['BAND_i'], c=coloring, alpha=.5, cmap='RdGy', s=5)
+  ax.scatter(df['BAND_r'], df['BAND_g'], df['BAND_i'], c=coloring, alpha=.9, cmap='bwr', s=5)
+  ax.set_facecolor("black")
 
 def cluster_df_3d(filename, num_clusters, nrows=5000):
   df = add_axis_subtraction(load_df(filename, nrows))
@@ -78,12 +79,12 @@ if __name__ == '__main__':
   # new_df = df.copy()
   # new_df['cluster'] = clustering
   # print(new_df)
-  df = cluster_df('out/output_1.csv',7)
-  write_cluster(df, './out/cluster_df')
+  df = cluster_df('./output_1.csv',7)
+  write_cluster(df, './out/cluster_df.csv')
   plot_clustering_2d(df)
-  # df = cluster_df_3d('out/output_1.csv', 5, 10000)
+  df = cluster_df_3d('./output_1.csv', 5, 10000)
 
-  # plot_clustering_3d(df, df['days_since'])
-  # plot_clustering_3d(df, df['cluster'])
+  plot_clustering_3d(df, df['days_since'])
+  plot_clustering_3d(df, df['cluster'])
 
   plt.show()

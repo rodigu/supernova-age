@@ -57,7 +57,6 @@ def get_data(save_raw=False, days_range=1):
             lc_df['SNID']=lc.meta['SNID']
             lc_df['1stDet']=lc.meta['MJD_DETECT_FIRST']
             # lc_df['Trigger']=lc.meta['MJD_TRIGGER']
-            # lc_df['Model_num']=lc.meta['SIM_TYPE_INDEX']
             # lc_df['filename']=filename[1]
             
             # fig, ax = plt.subplots()
