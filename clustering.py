@@ -28,7 +28,7 @@ def plot_clustering_2d(df):
   # plt.figure(1,2,1)
   
   # plt.scatter(x=xs, y=ys, c=clustering, s=30, cmap='tab10')
-  plt.scatter(x=df['r-i'], y=df['g-r'], c=df['days_since'].astype(int), s=20, cmap='tab10', alpha = .5)
+  plt.scatter(x=df['r-i'], y=df['g-r'], c=df['days_since'].astype(int), s=20, cmap='RdGy', alpha = .5)
   plt.colorbar()
   plt.xlabel('r-i')
   plt.ylabel('g-r')
@@ -78,11 +78,12 @@ if __name__ == '__main__':
   # new_df = df.copy()
   # new_df['cluster'] = clustering
   # print(new_df)
-  # df = cluster_df('two_day_range.csv',7)
-  # write_cluster(df, './out/cluster_df')
-  df = cluster_df_3d('./one_day_out.csv', 5, 10000)
+  df = cluster_df('out/output_1.csv',7)
+  write_cluster(df, './out/cluster_df')
+  plot_clustering_2d(df)
+  # df = cluster_df_3d('out/output_1.csv', 5, 10000)
 
-  plot_clustering_3d(df, df['days_since'])
-  plot_clustering_3d(df, df['cluster'])
+  # plot_clustering_3d(df, df['days_since'])
+  # plot_clustering_3d(df, df['cluster'])
 
   plt.show()

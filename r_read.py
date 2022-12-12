@@ -9,7 +9,7 @@ import pandas
 import time
 
 def get_data(save_raw=False, days_range=1):
-    models = os.listdir('data/')[::]
+    models = os.listdir('data/')[1::]
     heads_list = []
     phots_list = []
     print("Reading models")
@@ -108,7 +108,7 @@ def run_pipeline(days_range=1, save_raw=False):
     return adf
 
 BAND_CHOICE = ['BAND_r', 'BAND_i', 'BAND_g']
-DAY_RANGE = 2
+DAY_RANGE = 1
 
 if __name__ == '__main__':
     print('Running')

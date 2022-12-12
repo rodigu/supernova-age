@@ -54,6 +54,7 @@ def heatmap_proportions(clusters_evaluations,filename):
   fig, ax = plt.subplots()
   # print(len(clusters_evaluations.index))
   im = ax.imshow(clusters_evaluations)
+  im.show()
 
   # Show all ticks and label them with the respective list entries
   # print([n for n in range(0,num_clusters)])
@@ -75,9 +76,9 @@ def heatmap_proportions(clusters_evaluations,filename):
   return plt.show()
 
 if __name__ == '__main__':
-  filename='one_day_out.csv'
+  filename='out/output_1.csv'
   num_clusters=5
-  df = cluster_df_3d(filename, num_clusters, 20000)
+  df = cluster_df(filename, num_clusters, 20000)
   actual_cluster_num = len(df['cluster'].unique())
   # print(df[df['cluster'] < 0])
 
