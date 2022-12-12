@@ -9,10 +9,10 @@ def add_axis_subtraction(df):
   df['r-i'] = df['BAND_r'] - df['BAND_i']
   df['g-r'] = df['BAND_g'] - df['BAND_r']
   df['days_since'] = df['MJD'] - df['1stDet']
-
-  print(df['BAND_r'].isnull().values.any(), df['BAND_i'].isnull().values.any(), df['BAND_g'].isnull().values.any())
   
   df = df[df['days_since'] < 15]
+
+  # print(df[df['r-i'].isnull()])
   
   return df
 
@@ -45,6 +45,8 @@ def run_spectral_clustering_3d(df, cluster_num):
   print(len(set(clustering.labels_)))
   return clustering.labels_
 
+
+
 def plot_clustering_3d(df, coloring):
   fig = plt.figure()
   ax = fig.add_subplot(projection='3d')
@@ -72,7 +74,7 @@ def write_cluster(df, filename):
   df.to_csv(filename)
 
 def load_df(filename, nrows=5000):
-  return pd.read_csv(filename)
+  return pd.read_csv(filename).replace([np.inf, -np.inf], np.nan).dropna()
 
 if __name__ == '__main__':
   # df = add_axis_subtraction(load_df())

@@ -38,12 +38,12 @@ def get_data(save_raw=False, days_range=1):
             "i ": u"#832db6", # YSE-i
             "z ": u"#656364"} # YSE-z
 
-    # skip_size = 50
+    # skip_size = 100
     for head, phot in zip(heads_list, phots_list): #lots of LCs per head, phot files, so do a few to start
         i = head.find('_HEAD.FITS.gz')
         assert head[:i] == phot[:i], f'HEAD and PHOT files name mismatch: {head}, {phot}'
         filename = head[:i].split('/')[1:3]#.split('.')[0:2]
-        # num_heads = 200
+        # num_heads = 50
         print('Current file: ', filename)
         start_time = time.time()
         for LCnum, lc in enumerate(sncosmo.read_snana_fits(head, phot)): # remember: multiple SN in single HEAD/PHOT file
@@ -51,12 +51,16 @@ def get_data(save_raw=False, days_range=1):
             
             #print(lc.columns)
             lc_df = lc.to_pandas()
-            
+            #               {'01': 'SNIa', '12': 'SNII', '20': 'SNII', '33': 'SNII', '37': 'SNIbc’}
+            model_to_type = {'01': 0, '12': 1, '20': 1, '33': 1, '37': 2}
             # lc_df_meta = pandas.DataFrame.from_dict(lc_meta,orient='columns')
-
+            lc_df['parsnip_type'] = model_to_type[filename[0][-2:]]
             lc_df['SNID']=lc.meta['SNID']
             lc_df['1stDet']=lc.meta['MJD_DETECT_FIRST']
+
+
             # lc_df['Trigger']=lc.meta['MJD_TRIGGER']
+            # lc_df['Model_num']=lc.meta['SIM_TYPE_INDEX']
             # lc_df['filename']=filename[1]
             
             # fig, ax = plt.subplots()
@@ -101,7 +105,8 @@ def average_bands(df):
 
 def run_pipeline(days_range=1, save_raw=False):
     df = get_data(save_raw, days_range)
-    adf = average_bands(df[['1stDet', 'MJD', 'norm_MJD', 'SNID', *BAND_CHOICE]])
+    adf = average_bands(df[['1stDet', 'MJD', 'norm_MJD', 'SNID', 'parsnip_type', *BAND_CHOICE]])
+    adf['parsnip_type'] = adf['parsnip_type'].astype(int)
     print(f'Usable data: {len(adf) / len(df): .3}')
     print(f'Total usable: {len(adf)}, out of {len(df)}')
     return adf
@@ -121,7 +126,7 @@ if __name__ == '__main__':
     print(f"    Total time taken: {time.time() - start_time} seconds")
 
     start_time = time.time()
-    df.to_csv(f'./out/output_{day_range}_all.csv')
+    df.to_csv(f'./out/output_{day_range}_test_typed.csv')
     print(f"    Time to write file: {time.time() - start_time}")
 # print('Unique SNID 2 day: ', df['SNID'].nunique())
 
