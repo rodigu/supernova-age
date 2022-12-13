@@ -34,10 +34,15 @@ def add_axis_subtraction(df: pd.DataFrame, sample_size=5000, max_age=15) -> dict
   
   return df # SNIIdf,SNIadf,SNIbcdf
 
-def run_spectral_clustering_2d(df, cluster_num):
-  xs = df['r-i']
-  ys = df['g-r']
-  matrix = np.array([[x, y] for x, y in zip(xs, ys)])
+  :param df: dataframe with supernova information
+  :param cluster_num: number of clusters
+  :param by_x: which column to use as an x vector for the clustering algorithm
+  :param by_y: which column to use as a y vector for the clustering algorithm
+  :return: x vector, y vector, matrix [x,y], clustering labels list
+  """
+  xs = df[by_x]
+  ys = df[by_y]
+  matrix = np.array([xs, ys]).T
   clustering = SpectralClustering(n_clusters=cluster_num,
     assign_labels='discretize',
     random_state=0).fit(matrix)
