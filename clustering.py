@@ -11,10 +11,15 @@ def add_axis_subtraction(df):
   df['days_since'] = df['MJD'] - df['1stDet']
   
   df = df[df['days_since'] < 15]
-
+  # SNIIdf = df.copy()
+  # SNIIdf = SNIIdf[SNIIdf['parsnip_type']==1]
+  # SNIadf = df.copy()
+  # SNIadf = SNIadf[SNIadf['parsnip_type']==0]
+  # SNIbcdf = df.copy()
+  # SNIbcdf = SNIbcdf[SNIbcdf['parsnip_type']==2]
   # print(df[df['r-i'].isnull()])
   
-  return df
+  return df # SNIIdf,SNIadf,SNIbcdf
 
 def run_spectral_clustering_2d(df, cluster_num):
   xs = df['r-i']
