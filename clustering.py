@@ -3,9 +3,22 @@ import numpy as np
 import matplotlib.pyplot as plt
 import pandas as pd
 
-def add_axis_subtraction(df):
-  if len(df.index) > 100000:
-    df = df.sample(n=5000)
+def add_axis_subtraction(df: pd.DataFrame, sample_size=5000, max_age=15) -> dict[str, pd.DataFrame]:
+  """Adds axis subtraction (r-i and g-r) and supernova age to given dataframe.
+  Filters out supernovae that are older than 15 days.
+  Separates supernova by type.
+  Samples can be extracted if dataset is too large
+
+  :param df: dataframe with r, g and i bands, MJD and 1stDet date
+  :param sample_size: size of sample to be extracted from dataframe, defaults to 5000
+  :param max_age: max age of a supernova, defaults to 15
+  :return: dictionary keyed by supernova types with their respective dataframes as values
+  """
+  df = df.sample(n=sample_size)
+  
+  df['days_since'] = df['MJD'] - df['1stDet']
+  df = df[df['days_since'] < max_age]
+
   df['r-i'] = df['BAND_r'] - df['BAND_i']
   df['g-r'] = df['BAND_g'] - df['BAND_r']
   df['days_since'] = df['MJD'] - df['1stDet']
