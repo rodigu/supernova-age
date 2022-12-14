@@ -1,4 +1,3 @@
-from clustering import cluster_df, cluster_df_3d
 import pandas as pd
 import matplotlib.pyplot as plt
 import numpy as np
@@ -76,9 +75,8 @@ def heatmap_proportions(clusters_evaluations,filename):
   return plt.show()
 
 if __name__ == '__main__':
-  filename='output_1_typed.csv'
-  num_clusters=5
-  df = cluster_df(filename, num_clusters, 20000)
+  filename='./type_2_cluster.csv'
+  df = pd.read_csv(filename)
   # dfs = cluster_df(filename, num_clusters, 20000)
   # for df in dfs:
 

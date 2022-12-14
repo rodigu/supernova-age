@@ -52,75 +52,47 @@ def generate_matrix(df: pd.DataFrame, vect_columns: list[str]) -> tuple[list[pd.
   """
   vectors = []
   for v in vect_columns:
-    vectors.push(df[v])
+    vectors.append(df[v])
   return vectors, np.array(vectors).T
 
-def run_optics_clustering(df: pd.DataFrame, vect_columns: list[str]) -> tuple[list[pd.Series], np.array, list[int]]:
+def run_optics_clustering(df: pd.DataFrame, vect_columns: list[str], min_samples=5) -> tuple[list[pd.Series], np.array, list[int]]:
   vectors, matrix = generate_matrix(df, vect_columns)
-  clustering = OPTICS(min_samples=5, cluster_method='dbscan').fit(matrix)
-  print(len(set(clustering.labels_)))
+  clustering = OPTICS(min_samples=min_samples, cluster_method='dbscan').fit(matrix)
   return vectors, matrix, clustering.labels_
 
-def run_spectral_clustering_2d(df: pd.DataFrame, cluster_num: int, by_x='r-i', by_y='g-r') -> tuple[pd.Series, pd.Series, np.array, list[int]]:
-  """Runs spectral clustering on given dataframe
-
-  :param df: dataframe with supernova information
-  :param cluster_num: number of clusters
-  :param by_x: which column to use as an x vector for the clustering algorithm
-  :param by_y: which column to use as a y vector for the clustering algorithm
-  :return: x vector, y vector, matrix [x,y], clustering labels list
-  """
-  xs = df[by_x]
-  ys = df[by_y]
-  matrix = np.array([xs, ys]).T
-  clustering = SpectralClustering(n_clusters=cluster_num,
-    assign_labels='discretize',
-    random_state=0).fit(matrix)
-  return xs, ys, matrix, clustering.labels_
-
-def plot_clustering_2d(df):
+def plot_clustering_2d(df: pd.DataFrame, title:str, coloring='days_since', columns=['r-i', 'g-r']):
 
   # plt.figure(1,2,1)
   
   # plt.scatter(x=xs, y=ys, c=clustering, s=30, cmap='tab10')
   plt.axes().set_facecolor("black")
-  plt.scatter(x=df['r-i'], y=df['g-r'], c=df['days_since'].astype(int), s=20, cmap='bwr', alpha=.9)
+  plt.title(title)
+  plt.scatter(x=df[columns[0]], y=df[columns[1]], c=df[coloring].astype(int), s=20, cmap='bwr', alpha=.9)
   plt.colorbar()
   plt.xlabel('r-i')
   plt.ylabel('g-r')
 
-def run_spectral_clustering_3d(df, cluster_num):
-  xs = df['BAND_r']
-  ys = df['BAND_g']
-  zs = df['BAND_i']
-  matrix = np.array([xs, ys, zs]).T
-  clustering = OPTICS(min_samples=5, cluster_method='dbscan').fit(matrix)
-  print(len(set(clustering.labels_)))
-  return clustering.labels_
-
-
-
-def plot_clustering_3d(df, coloring):
+def plot_clustering_3d(df: pd.DataFrame, title:str, coloring='days_since', columns=['BAND_r','BAND_g','BAND_i']):
   fig = plt.figure()
   ax = fig.add_subplot(projection='3d')
 
-  ax.scatter(df['BAND_r'], df['BAND_g'], df['BAND_i'], c=coloring, alpha=.9, cmap='bwr', s=5)
+  ax.scatter(df[columns[0]], df[columns[1]], df[columns[2]], c=df[coloring], alpha=.9, cmap='bwr', s=5)
+  fig.title(title)
   ax.set_facecolor("black")
 
-def cluster_df_3d(filename, num_clusters, nrows=5000):
-  dfs = add_axis_subtraction(load_df(filename, nrows))
+def spectral_cluster_df(filename: str, num_clusters: int, vect_columns: list[str]):
+  dfs = add_axis_subtraction(load_df(filename))
   for sn_type, df in dfs.items():
-    clustering = run_spectral_clustering_3d(df, num_clusters)
+    _, _, clustering = run_spectral_clustering(df, num_clusters, vect_columns)
     new_df = df.copy()
     new_df['cluster'] = clustering
     dfs[sn_type] = new_df
   return dfs
 
-def cluster_df(filename, num_clusters, nrows=5000):
-  dfs = add_axis_subtraction(load_df(filename, nrows))
+def optics_cluster_df(filename:str, vect_columns:list[str], min_samples:int):
+  dfs = add_axis_subtraction(load_df(filename))
   for sn_type, df in dfs.items():
-    plot_clustering_2d(df)
-    _, _, _, clustering = run_spectral_clustering_2d(df, num_clusters)
+    _, _, _, clustering = run_optics_clustering(df, vect_columns, min_samples)
     new_df = df.copy()
     
     new_df['cluster'] = clustering
@@ -130,7 +102,7 @@ def cluster_df(filename, num_clusters, nrows=5000):
 def write_cluster(df, filename):
   df.to_csv(filename)
 
-def load_df(filename, nrows=5000):
+def load_df(filename):
   return pd.read_csv(filename).replace([np.inf, -np.inf], np.nan).dropna()
 
 if __name__ == '__main__':
@@ -140,15 +112,14 @@ if __name__ == '__main__':
   # new_df = df.copy()
   # new_df['cluster'] = clustering
   # print(new_df)
-  dfs_typed = cluster_df('./output_1_typed.csv',7)
-  for sn_type, df in dfs_typed.items():
-    # write_cluster(df, './out/cluster_df.csv')
-    plot_clustering_2d(df)
+  dfs_typed = spectral_cluster_df('./output_1_typed.csv', 5, ['r-i', 'g-r'])
+  plot_clustering_2d(dfs_typed['SNIIdf'], 'Type 2, days since', coloring='cluster')
+  write_cluster(dfs_typed['SNIIdf'], 'type_2_cluster.csv')
 
   
-  dfs_typed = cluster_df_3d('./output_1_typed.csv', 5, 10000)
-  for sn_type, df in dfs_typed.items():
-    plot_clustering_3d(df, df['days_since'])
-    plot_clustering_3d(df, df['cluster'])
+  # dfs_typed = optics_cluster_df('./output_1_typed.csv', 5, 10000)
+  # for sn_type, df in dfs_typed.items():
+  #   plot_clustering_3d(df, df['days_since'])
+  #   plot_clustering_3d(df, df['cluster'])
 
   plt.show()
