@@ -3,7 +3,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 import pandas as pd
 
-def add_axis_subtraction(df: pd.DataFrame, sample_size=5000, max_age=15) -> dict[str, pd.DataFrame]:
+def add_axis_subtraction(df: pd.DataFrame, sample_size=15000, max_age=15) -> dict[str, pd.DataFrame]:
   """Adds axis subtraction (r-i and g-r) and supernova age to given dataframe.
   Filters out supernovae that are older than 15 days.
   Separates supernova by type.
@@ -55,6 +55,11 @@ def generate_matrix(df: pd.DataFrame, vect_columns: list[str]) -> tuple[list[pd.
     vectors.append(df[v])
   return vectors, np.array(vectors).T
 
+def run_birch_clustering(df: pd.DataFrame, vect_columns: list[str], n_clusters=5):
+  vectors, matrix = generate_matrix(df, vect_columns)
+  clustering = OPTICS(n_clusters=n_clusters).fit(matrix)
+  return vectors, matrix, clustering.labels_
+
 def run_optics_clustering(df: pd.DataFrame, vect_columns: list[str], min_samples=5) -> tuple[list[pd.Series], np.array, list[int]]:
   vectors, matrix = generate_matrix(df, vect_columns)
   clustering = OPTICS(min_samples=min_samples).fit(matrix)
@@ -80,8 +85,7 @@ def plot_clustering_3d(df: pd.DataFrame, title:str, coloring='days_since', colum
   fig.title(title)
   ax.set_facecolor("black")
 
-def spectral_cluster_df(filename: str, num_clusters: int, vect_columns: list[str]):
-  dfs = add_axis_subtraction(load_df(filename))
+def spectral_cluster_df(dfs: dict[str, pd.DataFrame], num_clusters: int, vect_columns: list[str]):
   for sn_type, df in dfs.items():
     _, _, clustering = run_spectral_clustering(df, num_clusters, vect_columns)
     new_df = df.copy()
@@ -89,8 +93,7 @@ def spectral_cluster_df(filename: str, num_clusters: int, vect_columns: list[str
     dfs[sn_type] = new_df
   return dfs
 
-def optics_cluster_df(filename:str, vect_columns:list[str], min_samples:int):
-  dfs = add_axis_subtraction(load_df(filename))
+def optics_cluster_df(dfs: dict[str, pd.DataFrame], vect_columns:list[str], min_samples:int):
   for sn_type, df in dfs.items():
     _, _, clustering = run_optics_clustering(df, vect_columns, min_samples)
     new_df = df.copy()
@@ -106,44 +109,46 @@ def write_cluster(df, filename):
 def load_df(filename):
   return pd.read_csv(filename).replace([np.inf, -np.inf], np.nan).dropna()
 
-if __name__ == '__main__':
-  # df = add_axis_subtraction(load_df())
-  # xs, ys, matrix, clustering = run_spectral_clustering_2d(df, 10)
-  # plot_clustering_2d(xs, ys, matrix, clustering, df)
-  # new_df = df.copy()
-  # new_df['cluster'] = clustering
-  # print(new_df)
-  clust_num = 5
+def save_clustering_out():
+  dfs = add_axis_subtraction(load_df('./output_1_typed.csv'))
+  clust_nums = [3,5,7,10]
   out_filenames = ['type_II_cluster.csv','type_Ia_cluster.csv','type_Ibc_cluster.csv']
   sn_types = ['SNIIdf', 'SNIadf', 'SNIbcdf']
-  dfs_typed = spectral_cluster_df('./output_1_typed.csv', clust_num, ['r-i', 'g-r'])
-  for filename, sn_type in zip(out_filenames, sn_types):
-    write_cluster(dfs_typed[sn_type], f'./spectral_banddiff_{clust_num}/' + filename)
-  # plot_clustering_2d(dfs_typed['SNIIdf'], 'Type II, days since', coloring='cluster')
-  # write_cluster(dfs_typed['SNIIdf'], 'type_II_cluster.csv')
 
-  dfs_typed = spectral_cluster_df('./output_1_typed.csv', clust_num, ['BAND_r', 'BAND_i', 'BAND_g'])
-  for filename, sn_type in zip(out_filenames, sn_types):
-    write_cluster(dfs_typed[sn_type], f'./spectral_band_{clust_num}/' + filename)
-    
-  clust_num = 15
-  dfs_typed = optics_cluster_df('./output_1_typed.csv', ['BAND_r', 'BAND_i', 'BAND_g'], clust_num)
-  for filename, sn_type in zip(out_filenames, sn_types):
-    write_cluster(dfs_typed[sn_type], './optics_band_{clust_num}/' + filename)
+  for clust_num in clust_nums:
+    dfs_typed = spectral_cluster_df(dfs, clust_num, ['r-i', 'g-r'])
+    for filename, sn_type in zip(out_filenames, sn_types):
+      write_cluster(dfs_typed[sn_type], f'./spectral_banddiff_{clust_num}/' + filename)
 
-  dfs_typed = optics_cluster_df('./output_1_typed.csv', ['r-i', 'g-r'], clust_num)
-  for filename, sn_type in zip(out_filenames, sn_types):
-    write_cluster(dfs_typed[sn_type], './optics_banddif_{clust_num}/' + filename)
-  # # dfs_typed = optics_cluster_df('./output_1_typed.csv', 5, 10000)
-  # # for sn_type, df in dfs_typed.items():
-  # #   plot_clustering_3d(df, df['days_since'])
-  # #   plot_clustering_3d(df, df['cluster'])
+    dfs_typed = spectral_cluster_df(dfs, clust_num, ['BAND_r', 'BAND_i', 'BAND_g'])
+    for filename, sn_type in zip(out_filenames, sn_types):
+      write_cluster(dfs_typed[sn_type], f'./spectral_band_{clust_num}/' + filename)
 
-  # plt.show()
-  # plot_clustering_2d(dfs_typed['SNIadf'], 'Type Ia, days since', coloring='cluster')
-  # write_cluster(dfs_typed['SNIadf'], 'type_Ia_cluster.csv')
-  # plt.show()
+  clust_nums = [10,15,20]
+  for clust_num in clust_nums:
+    dfs_typed = optics_cluster_df(dfs, ['BAND_r', 'BAND_i', 'BAND_g'], clust_num)
+    for filename, sn_type in zip(out_filenames, sn_types):
+      write_cluster(dfs_typed[sn_type], f'./optics_band_{clust_num}/' + filename)
 
-  # plot_clustering_2d(dfs_typed['SNIbcdf'], 'Type Ibc, days since', coloring='cluster')
-  # write_cluster(dfs_typed['SNIbcdf'], 'type_Ibc_cluster.csv')
-  # plt.show()
+    dfs_typed = optics_cluster_df(dfs, ['r-i', 'g-r'], clust_num)
+    for filename, sn_type in zip(out_filenames, sn_types):
+      write_cluster(dfs_typed[sn_type], f'./optics_banddiff_{clust_num}/' + filename)
+
+if __name__ == '__main__':
+  dfs = add_axis_subtraction(load_df('./output_1_typed.csv'))
+  dfs_typed = run_birch_clustering(dfs, ['r-i', 'g-r'], 5)
+  plot_clustering_2d(dfs_typed['SNIIdf'], 'Type II, days since', coloring='days_since')
+  plot_clustering_2d(dfs_typed['SNIIdf'], 'Type II, clustering', coloring='cluster')
+  write_cluster(dfs_typed['SNIIdf'], 'type_II_cluster.csv')
+  for sn_type, df in dfs_typed.items():
+    plot_clustering_3d(df, df['days_since'])
+    plot_clustering_3d(df, df['cluster'])
+
+  plt.show()
+  plot_clustering_2d(dfs_typed['SNIadf'], 'Type Ia, days since', coloring='cluster')
+  plt.show()
+
+  plot_clustering_2d(dfs_typed['SNIbcdf'], 'Type Ibc, days since', coloring='cluster')
+  plt.show()
+
+  # save_clustering_out()
