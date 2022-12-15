@@ -28,13 +28,15 @@ def cluster_eval(df):
 def range_string(num_clusters):
   max_days = 15
   step_size = max_days/ num_clusters
-  return [f"{i * step_size:2f} to {(i + 1) * step_size:2f}" for i in range(num_clusters)]
+  return [f"{i * step_size:.2f} to {(i + 1) * step_size:.2f}" for i in range(num_clusters)]
 
 
 def hist_plot_cluster_proportions(in_df,outfilename, filename):
   df = in_df.transpose()
-  df.plot(kind='bar', rot=45, colormap='viridis', title = f"{filename.split('.')[0].replace('_',' ')} Days Since per Cluster")
-  plt.savefig(outfilename)
+  df.plot(kind='bar', rot=45, colormap='viridis',title = f"{filename.split('.')[0].replace('_',' ')} Days Since per Cluster", xlabel = 'Cluster')
+  plt.legend(bbox_to_anchor=(1.04,1))
+
+  plt.savefig(outfilename,bbox_inches = "tight")
   # else:
   # return sns.histplot(df, x='days_since', hue="cluster", element="step", stat="density", common_norm=False)
   
@@ -75,10 +77,12 @@ def heatmap_proportions(clusters_evaluations,filename:str,outfilename):
   fig.savefig(outfilename,bbox_inches='tight')
 
 if __name__ == '__main__':
+  # foldernames = ['birch_band_3','birch_banddiff_3','birch_band_5','birch_banddiff_5','birch_band_7','birch_banddiff_7','birch_band_10','birch_banddiff_10']
   foldernames=['optics_banddiff_20', 'optics_band_20','optics_banddiff_15', 'optics_band_15', 'optics_banddiff_10', 'optics_band_10','spectral_band_3','spectral_banddiff_3', 'spectral_band_5','spectral_banddiff_5', 'spectral_band_7','spectral_banddiff_7','spectral_band_10','spectral_banddiff_10']
   filenames=['type_II_cluster.csv','type_Ia_cluster.csv','type_Ibc_cluster.csv']
   for folder in foldernames:
     for filename in filenames:
+      print(folder, filename)
       df = pd.read_csv('./' + folder + '/' + filename)
       # dfs = cluster_df(filename, num_clusters, 20000)
       # for df in dfs:
@@ -99,7 +103,7 @@ if __name__ == '__main__':
       hist_plot_cluster_proportions(cluster_df, './' + folder + '/' + 'hist_' + filename.replace('.csv', '.png'), filename)
       # cluster_scatter_plot(df,filename)
       # plt.savefig('./' + folder + '/' + 'misc_' + filename.replace('.csv', '.png'))
-      plt.figure()
-      days_since_scatter_plot(df,filename, './' + folder + '/' + 'days_since_scatter_' + filename.replace('.csv', '.png'))
+      # plt.figure()
+      # days_since_scatter_plot(df,filename, './' + folder + '/' + 'days_since_scatter_' + filename.replace('.csv', '.png'))
       plt.figure()
       cluster_scatter_plot(df,filename, './' + folder + '/' + 'cluster_scatter_' + filename.replace('.csv', '.png'))
