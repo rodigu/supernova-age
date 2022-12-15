@@ -53,7 +53,6 @@ def heatmap_proportions(clusters_evaluations,filename):
   fig, ax = plt.subplots()
   # print(len(clusters_evaluations.index))
   im = ax.imshow(clusters_evaluations)
-  
 
   # Show all ticks and label them with the respective list entries
   # print([n for n in range(0,num_clusters)])
@@ -69,7 +68,6 @@ def heatmap_proportions(clusters_evaluations,filename):
   plt.setp(ax.get_xticklabels(), rotation=45, ha="right",
           rotation_mode="anchor")
   
-
   ax.set_title(f'Points in Range per Cluster\n{num_clusters} Clusters, {filename}')
   fig.tight_layout()
   return plt.show()
