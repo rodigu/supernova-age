@@ -1,6 +1,8 @@
 import pandas as pd
 import matplotlib.pyplot as plt
 import numpy as np
+import seaborn as sns
+from mpl_toolkits.axes_grid1 import make_axes_locatable
 
 def cluster_eval(df):
   max_days = 15
@@ -31,9 +33,11 @@ def range_string(num_clusters):
 
 def hist_plot_cluster_proportions(in_df):
   df = in_df.transpose()
-
-  df.plot(kind='bar', rot=45)
-  plt.show()
+  mpl_plt = df.plot(kind='bar', rot=45)
+  return mpl_plt
+  # else:
+  # return sns.histplot(df, x='days_since', hue="cluster", element="step", stat="density", common_norm=False)
+  
 
 def to_percent_in_cluster(df):
   new_df = df.copy()
@@ -45,49 +49,51 @@ def to_percent_in_cluster(df):
   return new_df
 
 def cluster_scatter_plot(df,filename):
-  plt.scatter(x = df['r-i'], y = df['g-r'], c = df['cluster'])
+  fig, (ax1, ax2) = plt.subplots(1, 2)
+  fig.suptitle(filename)
+  ax1.scatter(x = df['r-i'], y = df['g-r'], c = df['days_since'])
+  # divider = make_axes_locatable(ax1)
+  # cax1 = divider.append_axes('left', size='5%', pad=0.05)
+  ax2.scatter(x = df['r-i'], y = df['g-r'], c = df['cluster'])
+  # divider = make_axes_locatable(ax2)
+  # cax2 = divider.append_axes('right', size='5%', pad=0.05)
+  # fig.colorbar(ax1,cax=cax1,orientation='vertical')
+  # fig.colorbar(ax2,cax=cax2,orientation='vertical')
+  # ax3.hist_plot_cluster_proportions(df)
+  # ax4 = sns.heatmap(clusters_evaluations, annot=True,  linewidths=.5,fmt = 'd')
+  # ax4.set(xlabel ="Cluster", ylabel = "Range", title =filename)
+  # sns.jointplot(data=df, x='r-i', y='g-r',hue = 'days_since')
+  
   return plt.show()
 
 def heatmap_proportions(clusters_evaluations,filename):
   num_clusters = len(clusters_evaluations.columns)
-  fig, ax = plt.subplots()
+  # fig, ax = plt.subplots()
   # print(len(clusters_evaluations.index))
-  im = ax.imshow(clusters_evaluations)
-
-  # Show all ticks and label them with the respective list entries
-  # print([n for n in range(0,num_clusters)])
-  rows = [int(rng.split(' ')[-1]) for rng in clusters_evaluations.index]
-  columns = [n for n in range(0,num_clusters)]
-  # print(rows, len(rows))
-  ax.set_xticks([int(cluster) for cluster in columns], labels= columns)
-  ax.set_yticks(range(len(rows)),labels = rows) #[row/num_clusters for row in rows]
-  ax.set_ylabel('Ranges')
-  ax.set_xlabel('Cluster')
-  # print(ax.get_xticks(),ax.get_yticks())
-  # Rotate the tick labels and set their alignment.
-  plt.setp(ax.get_xticklabels(), rotation=45, ha="right",
-          rotation_mode="anchor")
-  
-  ax.set_title(f'Points in Range per Cluster\n{num_clusters} Clusters, {filename}')
-  fig.tight_layout()
-  return plt.show()
+  # im = ax.imshow(clusters_evaluations)
+  htmp = sns.heatmap(clusters_evaluations, annot=True,  linewidths=.5,fmt = 'd')
+  htmp.set(xlabel ="Cluster", ylabel = "Range", title =filename)
+  return htmp
 
 if __name__ == '__main__':
-  filename='./type_2_cluster.csv'
-  df = pd.read_csv(filename)
-  # dfs = cluster_df(filename, num_clusters, 20000)
-  # for df in dfs:
+  filenames=['./type_II_cluster.csv','./type_Ia_cluster.csv','./type_Ibc_cluster.csv']
+  for filename in filenames:
+    df = pd.read_csv(filename)
+    # dfs = cluster_df(filename, num_clusters, 20000)
+    # for df in dfs:
 
-  actual_cluster_num = len(df['cluster'].unique())
-  # print(df[df['cluster'] < 0])
+    actual_cluster_num = len(df['cluster'].unique())
+    # print(df[df['cluster'] < 0])
 
-  # df['cluster'] = df['cluster'] + 1
-  # # print(len(df.index))
-  cluster_df, ranges = cluster_eval(df)
-  print(df['cluster'].unique())
-  print(df[df['days_since'] <= 2])
-  print(cluster_df)
-  heatmap_proportions(cluster_df,filename)
-  hist_plot_cluster_proportions(cluster_df)
-  # cluster_scatter_plot(df,filename)
-  plt.show()
+    # df['cluster'] = df['cluster'] + 1
+    # # print(len(df.index))
+    cluster_df, ranges = cluster_eval(df)
+    # print(df['cluster'].unique())
+    # print(df[df['days_since'] <= 3])
+    print(cluster_df)
+    cluster_scatter_plot(df,filename)
+    heatmap_proportions(cluster_df,filename)
+    hist_plot_cluster_proportions(cluster_df)
+
+    # cluster_scatter_plot(df,filename)
+    plt.show()

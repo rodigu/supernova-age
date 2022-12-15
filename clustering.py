@@ -112,14 +112,28 @@ if __name__ == '__main__':
   # new_df = df.copy()
   # new_df['cluster'] = clustering
   # print(new_df)
+  out_filenames = ['type_II_cluster.csv','type_Ia_cluster.csv','type_Ibc_cluster.csv']
+  sn_types = ['SNIIdf', 'SNIadf', 'SNIbcdf']
   dfs_typed = spectral_cluster_df('./output_1_typed.csv', 5, ['r-i', 'g-r'])
-  plot_clustering_2d(dfs_typed['SNIIdf'], 'Type 2, days since', coloring='cluster')
-  write_cluster(dfs_typed['SNIIdf'], 'type_2_cluster.csv')
+  for filename, sn_type in zip(out_filenames, sn_types):
+    write_cluster(dfs_typed[sn_type], './spectral_banddiff_5_' + filename)
+  # plot_clustering_2d(dfs_typed['SNIIdf'], 'Type II, days since', coloring='cluster')
+  # write_cluster(dfs_typed['SNIIdf'], 'type_II_cluster.csv')
 
+  dfs_typed = spectral_cluster_df('./output_1_typed.csv', 5, ['BAND_r', 'BAND_i', 'BAND_g'])
+  for filename, sn_type in zip(out_filenames, sn_types):
+    write_cluster(dfs_typed[sn_type], './spectral_band_5_' + filename)
   
-  # dfs_typed = optics_cluster_df('./output_1_typed.csv', 5, 10000)
-  # for sn_type, df in dfs_typed.items():
-  #   plot_clustering_3d(df, df['days_since'])
-  #   plot_clustering_3d(df, df['cluster'])
+  # # dfs_typed = optics_cluster_df('./output_1_typed.csv', 5, 10000)
+  # # for sn_type, df in dfs_typed.items():
+  # #   plot_clustering_3d(df, df['days_since'])
+  # #   plot_clustering_3d(df, df['cluster'])
 
-  plt.show()
+  # plt.show()
+  # plot_clustering_2d(dfs_typed['SNIadf'], 'Type Ia, days since', coloring='cluster')
+  # write_cluster(dfs_typed['SNIadf'], 'type_Ia_cluster.csv')
+  # plt.show()
+
+  # plot_clustering_2d(dfs_typed['SNIbcdf'], 'Type Ibc, days since', coloring='cluster')
+  # write_cluster(dfs_typed['SNIbcdf'], 'type_Ibc_cluster.csv')
+  # plt.show()
