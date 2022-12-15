@@ -118,21 +118,22 @@ if __name__ == '__main__':
   sn_types = ['SNIIdf', 'SNIadf', 'SNIbcdf']
   dfs_typed = spectral_cluster_df('./output_1_typed.csv', clust_num, ['r-i', 'g-r'])
   for filename, sn_type in zip(out_filenames, sn_types):
-    write_cluster(dfs_typed[sn_type], f'./spectral_banddiff_{clust_num}_' + filename)
+    write_cluster(dfs_typed[sn_type], f'./spectral_banddiff_{clust_num}/' + filename)
   # plot_clustering_2d(dfs_typed['SNIIdf'], 'Type II, days since', coloring='cluster')
   # write_cluster(dfs_typed['SNIIdf'], 'type_II_cluster.csv')
 
-  dfs_typed = spectral_cluster_df('./output_1_typed.csv', {clust_num}, ['BAND_r', 'BAND_i', 'BAND_g'])
+  dfs_typed = spectral_cluster_df('./output_1_typed.csv', clust_num, ['BAND_r', 'BAND_i', 'BAND_g'])
   for filename, sn_type in zip(out_filenames, sn_types):
-    write_cluster(dfs_typed[sn_type], './spectral_band_{clust_num}_' + filename)
-  
-  dfs_typed = optics_cluster_df('./output_1_typed.csv', ['BAND_r', 'BAND_i', 'BAND_g'], 15)
+    write_cluster(dfs_typed[sn_type], f'./spectral_band_{clust_num}/' + filename)
+    
+  clust_num = 15
+  dfs_typed = optics_cluster_df('./output_1_typed.csv', ['BAND_r', 'BAND_i', 'BAND_g'], clust_num)
   for filename, sn_type in zip(out_filenames, sn_types):
-    write_cluster(dfs_typed[sn_type], './optics_band_5_' + filename)
+    write_cluster(dfs_typed[sn_type], './optics_band_{clust_num}/' + filename)
 
-  dfs_typed = optics_cluster_df('./output_1_typed.csv', ['r-i', 'g-r'], 15)
+  dfs_typed = optics_cluster_df('./output_1_typed.csv', ['r-i', 'g-r'], clust_num)
   for filename, sn_type in zip(out_filenames, sn_types):
-    write_cluster(dfs_typed[sn_type], './optics_banddif_5_' + filename)
+    write_cluster(dfs_typed[sn_type], './optics_banddif_{clust_num}/' + filename)
   # # dfs_typed = optics_cluster_df('./output_1_typed.csv', 5, 10000)
   # # for sn_type, df in dfs_typed.items():
   # #   plot_clustering_3d(df, df['days_since'])
