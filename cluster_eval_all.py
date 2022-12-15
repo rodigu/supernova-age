@@ -33,7 +33,7 @@ def range_string(num_clusters):
 
 def hist_plot_cluster_proportions(in_df):
   df = in_df.transpose()
-  mpl_plt = df.plot(kind='bar', rot=45)
+  mpl_plt = df.plot(kind='bar', rot=45, colormap='viridis')
   return mpl_plt
   # else:
   # return sns.histplot(df, x='days_since', hue="cluster", element="step", stat="density", common_norm=False)
@@ -76,7 +76,7 @@ def heatmap_proportions(clusters_evaluations,filename):
   return htmp
 
 if __name__ == '__main__':
-  filenames=['./type_II_cluster.csv','./type_Ia_cluster.csv','./type_Ibc_cluster.csv']
+  filenames=['./optics_band_5_type_II_cluster.csv','./optics_band_5_type_Ia_cluster.csv','./optics_band_5_type_Ibc_cluster.csv']
   for filename in filenames:
     df = pd.read_csv(filename)
     # dfs = cluster_df(filename, num_clusters, 20000)
