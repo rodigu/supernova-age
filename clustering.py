@@ -1,4 +1,4 @@
-from sklearn.cluster import SpectralClustering, DBSCAN, OPTICS
+from sklearn.cluster import SpectralClustering, Birch, OPTICS
 import numpy as np
 import matplotlib.pyplot as plt
 import pandas as pd
@@ -57,7 +57,7 @@ def generate_matrix(df: pd.DataFrame, vect_columns: list[str]) -> tuple[list[pd.
 
 def run_birch_clustering(df: pd.DataFrame, vect_columns: list[str], n_clusters=5):
   vectors, matrix = generate_matrix(df, vect_columns)
-  clustering = OPTICS(n_clusters=n_clusters).fit(matrix)
+  clustering = Birch(n_clusters=n_clusters, threshold=.06).fit(matrix)
   return vectors, matrix, clustering.labels_
 
 def run_optics_clustering(df: pd.DataFrame, vect_columns: list[str], min_samples=5) -> tuple[list[pd.Series], np.array, list[int]]:
@@ -82,8 +82,17 @@ def plot_clustering_3d(df: pd.DataFrame, title:str, coloring='days_since', colum
   ax = fig.add_subplot(projection='3d')
 
   ax.scatter(df[columns[0]], df[columns[1]], df[columns[2]], c=df[coloring], alpha=.9, cmap='bwr', s=5)
-  fig.title(title)
+  ax.set_title(title)
   ax.set_facecolor("black")
+
+def birch_cluster_df(dfs: dict[str, pd.DataFrame], num_clusters: int, vect_columns: list[str]):
+  for sn_type, df in dfs.items():
+    _, _, clustering = run_birch_clustering(df, vect_columns, num_clusters)
+    new_df = df.copy()
+    new_df['cluster'] = clustering
+    print(new_df['cluster'].nunique())
+    dfs[sn_type] = new_df
+  return dfs
 
 def spectral_cluster_df(dfs: dict[str, pd.DataFrame], num_clusters: int, vect_columns: list[str]):
   for sn_type, df in dfs.items():
@@ -136,19 +145,20 @@ def save_clustering_out():
 
 if __name__ == '__main__':
   dfs = add_axis_subtraction(load_df('./output_1_typed.csv'))
-  dfs_typed = run_birch_clustering(dfs, ['r-i', 'g-r'], 5)
-  plot_clustering_2d(dfs_typed['SNIIdf'], 'Type II, days since', coloring='days_since')
-  plot_clustering_2d(dfs_typed['SNIIdf'], 'Type II, clustering', coloring='cluster')
-  write_cluster(dfs_typed['SNIIdf'], 'type_II_cluster.csv')
-  for sn_type, df in dfs_typed.items():
-    plot_clustering_3d(df, df['days_since'])
-    plot_clustering_3d(df, df['cluster'])
+  
+  dfs_typed = birch_cluster_df(dfs, 5, ['r-i', 'g-r'])
 
+  # for sn_type, df in dfs_typed.items():
+  #   print(df['cluster'])
+  #   plot_clustering_3d(df, 'days since', 'days_since')
+  #   plot_clustering_3d(df, 'cluster', 'cluster')
+  plot_clustering_2d(dfs_typed['SNIIdf'], 'Type Ia, days since', coloring='cluster')
   plt.show()
+  
   plot_clustering_2d(dfs_typed['SNIadf'], 'Type Ia, days since', coloring='cluster')
   plt.show()
 
-  plot_clustering_2d(dfs_typed['SNIbcdf'], 'Type Ibc, days since', coloring='cluster')
+  plot_clustering_2d(dfs_typed['SNIbcdf'], 'Type Ibc, clustering', coloring='cluster')
   plt.show()
 
   # save_clustering_out()
