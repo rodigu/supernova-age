@@ -57,7 +57,7 @@ def generate_matrix(df: pd.DataFrame, vect_columns: list[str]) -> tuple[list[pd.
 
 def run_optics_clustering(df: pd.DataFrame, vect_columns: list[str], min_samples=5) -> tuple[list[pd.Series], np.array, list[int]]:
   vectors, matrix = generate_matrix(df, vect_columns)
-  clustering = OPTICS(min_samples=min_samples, cluster_method='dbscan').fit(matrix)
+  clustering = OPTICS(min_samples=min_samples).fit(matrix)
   return vectors, matrix, clustering.labels_
 
 def plot_clustering_2d(df: pd.DataFrame, title:str, coloring='days_since', columns=['r-i', 'g-r']):
@@ -92,10 +92,11 @@ def spectral_cluster_df(filename: str, num_clusters: int, vect_columns: list[str
 def optics_cluster_df(filename:str, vect_columns:list[str], min_samples:int):
   dfs = add_axis_subtraction(load_df(filename))
   for sn_type, df in dfs.items():
-    _, _, _, clustering = run_optics_clustering(df, vect_columns, min_samples)
+    _, _, clustering = run_optics_clustering(df, vect_columns, min_samples)
     new_df = df.copy()
     
     new_df['cluster'] = clustering
+    print(new_df['cluster'].nunique())
     dfs[sn_type] = new_df
   return dfs
 
@@ -125,6 +126,13 @@ if __name__ == '__main__':
   for filename, sn_type in zip(out_filenames, sn_types):
     write_cluster(dfs_typed[sn_type], './spectral_band_{clust_num}_' + filename)
   
+  dfs_typed = optics_cluster_df('./output_1_typed.csv', ['BAND_r', 'BAND_i', 'BAND_g'], 15)
+  for filename, sn_type in zip(out_filenames, sn_types):
+    write_cluster(dfs_typed[sn_type], './optics_band_5_' + filename)
+
+  dfs_typed = optics_cluster_df('./output_1_typed.csv', ['r-i', 'g-r'], 15)
+  for filename, sn_type in zip(out_filenames, sn_types):
+    write_cluster(dfs_typed[sn_type], './optics_banddif_5_' + filename)
   # # dfs_typed = optics_cluster_df('./output_1_typed.csv', 5, 10000)
   # # for sn_type, df in dfs_typed.items():
   # #   plot_clustering_3d(df, df['days_since'])
