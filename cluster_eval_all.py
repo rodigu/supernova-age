@@ -79,10 +79,12 @@ def heatmap_proportions(clusters_evaluations,filename:str,outfilename):
 if __name__ == '__main__':
   foldernames = ['birch/band/3','birch/diff/3','birch/band/5','birch/diff/5','birch/band/7','birch/diff/7','birch/band/10','birch/diff/10','optics/diff/20', 'optics/band/20','optics/diff/15', 'optics/band/15', 'optics/diff/10', 'optics/band/10','spectral/band/3','spectral/diff/3', 'spectral/band/5','spectral/diff/5', 'spectral/band/7','spectral/diff/7','spectral/band/10','spectral/diff/10']
   filenames=['type_II_cluster.csv','type_Ia_cluster.csv','type_Ibc_cluster.csv']
+  for filename in filenames:
+    df = pd.read_csv('./' + foldernames[0] + '/' + filename)
+    days_since_scatter_plot(df, filename, f'./{filename.split(".")[0]}_days_since_scatter.png')
   for folder in foldernames:
     for filename in filenames:
       print(folder, filename)
-      df = pd.read_csv('./' + folder + '/' + filename)
       # dfs = cluster_df(filename, num_clusters, 20000)
       # for df in dfs:
 

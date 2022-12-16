@@ -74,3 +74,5 @@ You need `output_1_test_typed.csv` inside the `out` folder to run `clustering.py
 ## Clustering evaluation
 
 Running `cluster_eval_all.py` will make use of the generated csvs and create 3 plots for each csv that are used in our evaluation process.
+
+It will also generate the 3 scatter plots for each SN type, colored by age.
