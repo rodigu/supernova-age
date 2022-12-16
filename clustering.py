@@ -86,14 +86,14 @@ def plot_clustering_3d(df: pd.DataFrame, title:str, coloring='days_since', colum
   ax.set_title(title)
   ax.set_facecolor("black")
 
-def plot_clustering_plotly(df,filename):
+def plot_clustering_plotly(df, zs, color_col):
   # fig = px.scatter_3d(df, x='BAND_r', y='BAND_g', z='BAND_i',
   #             color='cluster')
   fig = go.Figure()
   
-  fig.add_trace(go.Scatter3d(x=df['r-i'], y=df['g-r'], z=df['cluster'],
+  fig.add_trace(go.Scatter3d(x=df['r-i'], y=df['g-r'], z=zs,
             mode='markers',
-            marker=dict(color=df['days_since'])))
+            marker=dict(color=df[color_col])))
   
   
   fig.show()
@@ -152,16 +152,32 @@ def save_cluster(dfs, clust_nums, out_filenames, sn_types, cluster_alg_name, clu
     for filename, sn_type in zip(out_filenames, sn_types):
       write_cluster(dfs_typed[sn_type], f'./{cluster_alg_name}_banddiff_{clust_num}/' + filename)
 
+def plot_3d_clustered():
+  filenames = ['./birch/band/7/type_II_cluster.csv','./birch/band/7/type_Ia_cluster.csv','./birch/band/7/type_Ibc_cluster.csv']
+  dfs = [load_df(file) for file in filenames]
+  for df in dfs:
+    plot_clustering_plotly(df, df['cluster'], 'days_since')
+
 if __name__ == '__main__':
   dfs = add_axis_subtraction(load_df('./output_1_typed.csv'))
   clust_nums = [14]
   out_filenames = ['type_II_cluster.csv','type_Ia_cluster.csv','type_Ibc_cluster.csv']
   sn_types = ['SNIIdf', 'SNIadf', 'SNIbcdf']
-  save_cluster(dfs, clust_nums, out_filenames, sn_types, 'birch', birch_cluster_df)
-  # filenames = ['./birch/band/7/type_II_cluster.csv','./birch/band/7/type_Ia_cluster.csv','./birch/band/7/type_Ibc_cluster.csv']
-  # dfs = [load_df(file) for file in filenames]
-  # for df,filename in zip(dfs,filenames):
-  #   plot_clustering_plotly(df,filename)
+  # save_cluster(dfs, clust_nums, out_filenames, sn_types, 'birch', birch_cluster_df)
+  filenames = ['./birch/band/5/type_II_cluster.csv','./birch/band/5/type_Ia_cluster.csv','./birch/band/5/type_Ibc_cluster.csv']
+  dfs = {sn_type: load_df(file) for sn_type, file in zip(sn_types, filenames)}
+  for df in dfs.values():
+    df['cluster_diff'] = -1
+    for cluster_id in range(df['cluster'].nunique()):
+      _, _, clustering = run_spectral_clustering(df[df['cluster'] == cluster_id], cluster_num=5, vect_columns=['BAND_i', 'BAND_r', 'BAND_g'])
+      df.loc[df['cluster'] == cluster_id, 'cluster_diff'] = clustering
+  
+
+
+  for df in dfs.values():
+    plot_clustering_plotly(df, df['cluster'], 'cluster_diff')
+
+  plot_3d_clustered()
   # for sn_type, df in dfs_typed.items():
   #   print(df['cluster'])
   #   plot_clustering_3d(df, 'days since', 'days_since')
