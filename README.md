@@ -58,7 +58,7 @@ That file can be downloaded from: https://raw.githubusercontent.com/rodigu/super
 ## Data processing
 
 Running `r_read.py` as is will produce a file `output_1_test_typed.csv` inside the `out` folder.
-It expects data from inside a `data` folder containig the simulations of the SNe.
+It expects data from inside a `data` folder containing the simulations of the SNe.
 
 Altering the constant list `BAND_CHOICE` will change which bands are kept after processing.
 Altering the constant int `DAY_RANGE` will affect the range of days for averageing band readings.
