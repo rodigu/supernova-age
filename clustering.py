@@ -2,6 +2,7 @@ from sklearn.cluster import SpectralClustering, Birch, OPTICS
 import numpy as np
 import matplotlib.pyplot as plt
 import pandas as pd
+import plotly.graph_objects as go
 
 def add_axis_subtraction(df: pd.DataFrame, sample_size=15000, max_age=15) -> dict[str, pd.DataFrame]:
   """Adds axis subtraction (r-i and g-r) and supernova age to given dataframe.
@@ -85,6 +86,18 @@ def plot_clustering_3d(df: pd.DataFrame, title:str, coloring='days_since', colum
   ax.set_title(title)
   ax.set_facecolor("black")
 
+def plot_clustering_plotly(df,filename):
+  # fig = px.scatter_3d(df, x='BAND_r', y='BAND_g', z='BAND_i',
+  #             color='cluster')
+  fig = go.Figure()
+  
+  fig.add_trace(go.Scatter3d(x=df['r-i'], y=df['g-r'], z=df['cluster'],
+            mode='markers',
+            marker=dict(color=df['days_since'])))
+  
+  
+  fig.show()
+  
 def birch_cluster_df(dfs: dict[str, pd.DataFrame], vect_columns: list[str], num_clusters: int):
   for sn_type, df in dfs.items():
     _, _, clustering = run_birch_clustering(df, vect_columns, num_clusters)
@@ -141,12 +154,14 @@ def save_cluster(dfs, clust_nums, out_filenames, sn_types, cluster_alg_name, clu
 
 if __name__ == '__main__':
   dfs = add_axis_subtraction(load_df('./output_1_typed.csv'))
-  clust_nums = [3,5,7,10]
+  clust_nums = [14]
   out_filenames = ['type_II_cluster.csv','type_Ia_cluster.csv','type_Ibc_cluster.csv']
   sn_types = ['SNIIdf', 'SNIadf', 'SNIbcdf']
-
   save_cluster(dfs, clust_nums, out_filenames, sn_types, 'birch', birch_cluster_df)
-
+  # filenames = ['./birch/band/7/type_II_cluster.csv','./birch/band/7/type_Ia_cluster.csv','./birch/band/7/type_Ibc_cluster.csv']
+  # dfs = [load_df(file) for file in filenames]
+  # for df,filename in zip(dfs,filenames):
+  #   plot_clustering_plotly(df,filename)
   # for sn_type, df in dfs_typed.items():
   #   print(df['cluster'])
   #   plot_clustering_3d(df, 'days since', 'days_since')
