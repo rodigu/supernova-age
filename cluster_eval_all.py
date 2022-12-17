@@ -81,6 +81,7 @@ if __name__ == '__main__':
   filenames=['type_II_cluster.csv','type_Ia_cluster.csv','type_Ibc_cluster.csv']
   for filename in filenames:
     df = pd.read_csv('./' + foldernames[0] + '/' + filename)
+    plt.figure()
     days_since_scatter_plot(df, filename, f'./{filename.split(".")[0]}_days_since_scatter.png')
   for folder in foldernames:
     for filename in filenames:
